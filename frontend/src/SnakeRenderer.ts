@@ -105,7 +105,7 @@ function draw() {
       // Trail (body segments)
       const isTrail = trail.some(t => t.x === x && t.y === y);
       if (isTrail && !(x === headPos.x && y === headPos.y)) {
-        ctx.fillStyle = 'rgba(0,255,170,0.25)';
+        ctx.fillStyle = 'rgba(131,110,249,0.25)';
         roundRect(ctx, cx + 2, cy + 2, cellW - 4, cellH - 4, r);
       }
 
@@ -131,8 +131,8 @@ function draw() {
 
       // Head
       if (x === headPos.x && y === headPos.y) {
-        const glow = gameOver ? '#ff4466' : '#00ffaa';
-        ctx.fillStyle = gameOver ? 'rgba(255,68,102,0.9)' : 'rgba(0,255,170,0.95)';
+        const glow = gameOver ? '#ff4466' : '#836EF9';
+        ctx.fillStyle = gameOver ? 'rgba(255,68,102,0.9)' : 'rgba(131,110,249,0.95)';
         ctx.shadowColor = glow;
         ctx.shadowBlur = 20 * window.devicePixelRatio;
         roundRect(ctx, cx + 2, cy + 2, cellW - 4, cellH - 4, r);

@@ -1,4 +1,4 @@
-import { getProvider, connectWallet, getRegistryContract, getVMContract, setNetworkType, getNetworkType } from './wallet';
+import { getProvider, connectWallet, getRegistryContract, getVMContract, setNetworkType, getNetworkType, getWalletState } from './wallet';
 import type { NetworkType } from './wallet';
 import { initGoL3D, updateGoL3D, destroyGoL3D } from './GoL3D';
 import { initSnakeCanvas, updateSnakeState, destroySnakeCanvas } from './SnakeRenderer';
@@ -23,7 +23,7 @@ let activeGame: string | null = null;
 let txLogs: {msg: string, type: 'info'|'success'|'error', time: string}[] = [];
 
 // Tamagotchi
-let petState = { hunger: 50, happiness: 50, energy: 50, dead: false };
+let petState = { hunger: 50, happiness: 50, energy: 50, age: 0, dead: false };
 
 // Game of Life
 const NUM_CELLS = 1000;
@@ -51,7 +51,7 @@ function render() {
   if (!activeGame) {
     app.innerHTML = `
       <div class="header">
-        <h1>🧠 Brainfuck Console — ${getNetworkType() === 'monad' ? 'Monad Testnet' : 'Localhost'}</h1>
+        <h1 style="display: flex; align-items: center; justify-content: center; gap: 12px;"><img src="/favicon.png" alt="Logo" style="height: 1.2em; width: 1.2em;" /> Brainfuck Console — ${getNetworkType() === 'monad' ? 'Monad Testnet' : 'Localhost'}</h1>
         <p class="subtitle">100% On-Chain Brainfuck Gaming Platform</p>
         <div class="network-badge">
           <select id="network-select" class="network-select" ${getProvider() ? 'disabled title="Disconnect to switch network"' : ''}>
@@ -201,18 +201,23 @@ function render() {
           <div class="stat-bars">
             <div class="stat-row">
               <div class="stat-label">HUNGER:</div>
-              <div class="stat-bar"><div class="stat-fill hunger" style="width: ${petState.hunger}%"></div></div>
+              <div class="stat-bar"><div class="stat-fill hunger" style="width: ${Math.min(100, petState.hunger)}%"></div></div>
               <div class="stat-value">${petState.hunger}</div>
             </div>
             <div class="stat-row">
               <div class="stat-label">HAPPY:</div>
-              <div class="stat-bar"><div class="stat-fill happiness" style="width: ${petState.happiness}%"></div></div>
+              <div class="stat-bar"><div class="stat-fill happiness" style="width: ${Math.min(100, petState.happiness)}%"></div></div>
               <div class="stat-value">${petState.happiness}</div>
             </div>
             <div class="stat-row">
               <div class="stat-label">ENERGY:</div>
-              <div class="stat-bar"><div class="stat-fill energy" style="width: ${petState.energy}%"></div></div>
+              <div class="stat-bar"><div class="stat-fill energy" style="width: ${Math.min(100, petState.energy)}%"></div></div>
               <div class="stat-value">${petState.energy}</div>
+            </div>
+            <div class="stat-row">
+              <div class="stat-label">AGE:</div>
+              <div class="stat-bar"><div class="stat-fill age" style="width: ${Math.min(100, petState.age)}%"></div></div>
+              <div class="stat-value">${petState.age}</div>
             </div>
           </div>
           
@@ -440,18 +445,32 @@ async function setupTamagotchi() {
   if (!reg) return addLog('Please connect MetaMask first.', 'error');
   
   try {
+    const { address } = getWalletState();
+    if (!address) return;
+
     addLog('Fetching on-chain state...', 'info');
-    const stateHex = await reg.getPlayerState(GAMES.tamagotchi.id);
+    const stateHex = await reg.getPlayerState(GAMES.tamagotchi.id, address);
     const bytes = ethers.getBytes(stateHex);
     
     if (bytes.length === 0) {
       addLog('No state found on-chain. Click INIT STATE first.', 'info');
-    } else if (bytes.length === 3) {
+    } else if (bytes.length >= 5) {
+      // Format: [hunger, happiness, energy, age, alive]
       petState.hunger = bytes[0];
       petState.happiness = bytes[1];
       petState.energy = bytes[2];
-      petState.dead = (petState.hunger === 0 || petState.happiness === 0 || petState.energy === 0);
+      petState.age = bytes[3];
+      petState.dead = (bytes[4] === 0);
       addLog('State loaded successfully.', 'success');
+      render();
+    } else if (bytes.length === 4) {
+      // Fallback for initial state that doesn't have 'alive' byte yet
+      petState.hunger = bytes[0];
+      petState.happiness = bytes[1];
+      petState.energy = bytes[2];
+      petState.age = bytes[3];
+      petState.dead = (petState.happiness === 0 || petState.energy === 0);
+      addLog('Initial state loaded.', 'success');
       render();
     }
   } catch(e: any) {
@@ -464,7 +483,7 @@ function setupTamagotchiEvents() {
     const reg = getRegistryContract();
     if (!reg) return;
     try {
-      addLog('Tx: Initializing cartidge state (ID 0)...', 'info');
+      addLog('Tx: Initializing cartridge state (ID 0)...', 'info');
       const tx = await reg["initState(uint256)"](GAMES.tamagotchi.id);
       addLog(`Mined! Hash: ${tx.hash.substring(0, 10)}...`, 'success');
       await tx.wait();
@@ -510,8 +529,27 @@ async function diceRoll() {
         const display = document.getElementById('dice-display');
         if (display) display.innerHTML = '🎲🔃'; // spin
         
-        // This is a static call (eth_call), no state change, fast and free execution!
-        const resultHex = await reg.play.staticCall(GAMES.dice.id, inputHex, 50_000);
+        // Send actual transaction
+        const tx = await reg.play(GAMES.dice.id, inputHex, 50_000);
+        addLog(`Waiting for confirmation... Hash: ${tx.hash.substring(0, 10)}`, 'info');
+        const receipt = await tx.wait();
+        
+        // Extract output from GamePlayed event
+        const iface = new ethers.Interface([
+            'event GamePlayed(uint256 indexed cartridgeId, address indexed player, bytes output)'
+        ]);
+        
+        let resultHex = '0x';
+        for (const log of receipt.logs) {
+            try {
+                const parsed = iface.parseLog({ topics: [...log.topics], data: log.data });
+                if (parsed && parsed.name === 'GamePlayed') {
+                    resultHex = parsed.args.output;
+                    break;
+                }
+            } catch (e) {}
+        }
+        
         const bytes = ethers.getBytes(resultHex);
         
         if (bytes.length === 1) {
@@ -521,7 +559,8 @@ async function diceRoll() {
             if (display) display.innerHTML = face;
             addLog(`Result calculated perfectly on-chain: ${bytes[0]}`, 'success');
         } else {
-            addLog('Invalid output length from VM', 'error');
+            addLog('Invalid output length from VM or Event not found', 'error');
+            if (display) display.innerHTML = '🎲❌';
         }
     } catch(e: any) {
         addLog('Roll failed: ' + e.message, 'error');
@@ -839,11 +878,11 @@ async function setupContador() {
   const reg = getRegistryContract();
   if (!reg) return;
   try {
-    const signer = await (await getProvider())?.getSigner();
-    if (!signer) return;
+    const { address } = getWalletState();
+    if (!address) return;
     
     // addLog('Fetching counter state from Monad...', 'info');
-    const state = await reg.getPlayerState(GAMES.contador.id, signer.address);
+    const state = await reg.getPlayerState(GAMES.contador.id, address);
     const bytes = ethers.getBytes(state);
     
     const val = bytes.length > 0 ? bytes[0] : 0;

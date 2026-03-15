@@ -31,8 +31,8 @@ contract Deploy is Script {
         uint256 tamaId = registry.loadCartridge(tamagotchi, "Tamagotchi", tamaDefaultState);
         console.log("Tamagotchi cartridge ID:", tamaId);
 
-        // ─── Register Dice Roller Cartridge (145 bytes) ───
-        bytes memory dice = hex"2c5b2d3e2b3e2b3c3c5d3e3e5b2d3c3c2b3e3e5d3c3c3e5b2d3e3e3e2b3c3c3c5d3e3e3e5b2d3c3c3c2b2b2b2b2b2b2b3c3c3c5d3c3c3e2b2b2b3e3e3e3e2b2b2b2b2b2b3e5b2d5d3e5b2d5d3c3c3c3c5b3c2d3e2b3e5b2d3e3e2b3e2b3c3c3c5d3e3e3e5b2d3c3c3c2b3e3e3e5d3c3c3c2d2d2d2d2d2d3e5b2d5d3e2b3e3e5b3e2d3e5b2d5d5d3e3e5b3c3c5b2d5d3e3e2d5d3c3c3c3c3c5d3e3e2b3e2e";
+        // ─── Register Dice Roller Cartridge (147 bytes) ───
+        bytes memory dice = hex"3e3e2c5b2d3e2b3e2b3c3c5d3e3e5b2d3c3c2b3e3e5d3c5b2d3e3e2b3c3c5d3e3e5b2d3c3c2b2b2b2b2b2b2b3e3e5d3c3c2b2b2b3e3e3e2b2b2b2b2b2b3e5b2d5d3e5b2d5d3c3c3c3c3c5b2d3e3e3e3e2b5b2d3c3c2b3c2b3e3e3e5d3c3c3c5b2d3e3e3e2b3c3c3c5d3e2d2d2d2d2d2d3c5b2d5d2b3e5b3c2d3e5b2d5d5d3c5b3e3e3e5b2d5d3c3c3c2d5d3c5d3e3e3e3e2b2e";
         uint256 diceId = registry.loadCartridge(dice, "Dice Roller");
         console.log("Dice Roller cartridge ID:", diceId);
 
