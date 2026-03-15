@@ -41,15 +41,15 @@ contract Deploy is Script {
         uint256 snakeId = registry.loadCartridge(snake, "Snake Minimalista");
         console.log("Snake Minimalista cartridge ID:", snakeId);
 
-        // ─── Register Jokenpo Cartridge (186 bytes) ───
+        // ─── Register Rock Paper Scissors Cartridge (186 bytes) ───
         bytes memory jokenpo = hex"2c3e2c3e5b2d5d3c5b2d3e2b5b2d3e2b3e2b3c3c5d3e3e5b2d3c3c2b3e3e5d3c2d2d2d3e3e5b2d5d2b3c3c5b3e3e5b2d5d3c3c5b2d5d5d3e3e5b3c3c3c5b2d5d3e3e3e5b2d5d5d3c3c3c3c5d3c2b2b2b3e3e5b2d3c3c2d3e3e5d3c3c5b2d3e2b3c5d5b2d5d3e5b2d3c2b5b2d3e3e3e2b3e2b3c3c3c3c5d3e3e3e3e5b2d3c3c3c3c2b3e3e3e3e5d3c2d2d2d3e3e5b2d5d2b3c3c5b3e3e5b2d5d3c3c5b2d5d5d3e3e5b3c3c3c3c3c5b2d5d3e3e3e3e3e5b2d5d5d3c3c3c3c5d3c2e";
-        uint256 jokenpoId = registry.loadCartridge(jokenpo, "Jokenpo");
-        console.log("Jokenpo cartridge ID:", jokenpoId);
+        uint256 jokenpoId = registry.loadCartridge(jokenpo, "Rock Paper Scissors");
+        console.log("Rock Paper Scissors cartridge ID:", jokenpoId);
 
-        // ─── Register Contador Invertido Cartridge ───
+        // ─── Register Inverted Counter Cartridge ───
         bytes memory contador = hex"2c3e2c3c5b2d5b2d5b5b2d5d5d5b2d3e5b2d3e2b3e2b3c3c5d3e3e5b2d5d3e5b2d5d3c3c5b2d3e5b2d3e2b3e2b3c3c5d3e3e5b2d3c3c2b3e3e5d3e5b2d5d2b3c5b3c3c5b2d5d3c2b3e3e3e5b2d5d3c3c3c5b2d5d3e3e3e5d3c5b3c3c2b3e3e5b2d5d5d3c3c3c5d3e3e5b2d5d2b3c3c5b2d3e5b2d5d3c5d3e5b3c3c5b2d3c3c3c3c3c3c3c3c3c3c3c3c2b3e3e3e3e3e3e3e3e3e3e3e3e5d5b2d5d5d3c3c5b2d5d3e5b2d5d3c3c3c3c3c3c3c3c3c3c3c3c3c5b2d5d5d5d5b2d3e2d3c5d5d3e2e";
-        uint256 contadorId = registry.loadCartridge(contador, "Contador Invertido");
-        console.log("Contador Invertido cartridge ID:", contadorId);
+        uint256 contadorId = registry.loadCartridge(contador, "Inverted Counter");
+        console.log("Inverted Counter cartridge ID:", contadorId);
 
         // Run test: Hello World to verify VM
         bytes memory helloWorld = bytes(
@@ -71,8 +71,8 @@ contract Deploy is Script {
         console.log("Tamagotchi ID:     0");
         console.log("Dice Roller ID:    1");
         console.log("Snake Id:          2");
-        console.log("Jokenpo Id:        3");
-        console.log("Contador Id:       4");
+        console.log("Rock Paper Scissors Id:        3");
+        console.log("Inverted Counter Id:       4");
         console.log("========================================");
     }
 }

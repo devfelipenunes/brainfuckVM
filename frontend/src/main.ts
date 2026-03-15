@@ -11,8 +11,8 @@ const GAMES = {
   tamagotchi: { id: 0, title: "Tamagotchi", type: "stateful" },
   dice:       { id: 1, title: "Dice Roller", type: "stateless" },
   snake:      { id: 2, title: "Snake", type: "onchain" },
-  jokenpo:    { id: 3, title: "Jokenpo", type: "stateless" }, // Rock Paper Scissors
-  contador:   { id: 4, title: "Contador Invertido", type: "stateful" },
+  jokenpo:    { id: 3, title: "Rock Paper Scissors", type: "stateless" }, // Rock Paper Scissors
+  contador:   { id: 4, title: "Inverted Counter", type: "stateful" },
   playground: { id: 99, title: "Playground", type: "playground" },
   gameoflife: { id: 5, title: "Game of Life", type: "stresstest" }, // If we ever re-add it
 };
@@ -76,59 +76,59 @@ function render() {
             <div class="game-icon">🏗️</div>
             <div class="featured-text">
               <h3>Playground</h3>
-              <p>O ambiente definitivo para desenvolvedores Monad. Escreva, depure e execute qualquer código Brainfuck diretamente na blockchain. Sem limites, apenas código puro.</p>
-              <div class="game-meta"><span>ESTADO: UNIVERSAL</span><span>TAXA: SOB DEMANDA</span><span>EXPERIMENTAL</span></div>
+              <p>The ultimate environment for Monad developers. Write, debug, and execute any Brainfuck code directly on the blockchain. No limits, just pure code.</p>
+              <div class="game-meta"><span>STATE: UNIVERSAL</span><span>FEE: ON-DEMAND</span><span>EXPERIMENTAL</span></div>
             </div>
           </div>
-          <!-- <div class="featured-badge">NOVO</div> -->
+          <!-- <div class="featured-badge">NEW</div> -->
         </div>
       </div>
 
       <div class="section-divider">
-        <span>CARTUCHOS DISPONÍVEIS</span>
+        <span>AVAILABLE CARTRIDGES</span>
       </div>
 
       <div class="game-selector">
         <div class="game-card" data-game="tamagotchi">
           <div class="game-icon">🐾</div>
           <h3>Tamagotchi</h3>
-          <p>Pet uses CartridgeRegistry.playWithState() to save state to the Monad EVM.</p>
-          <div class="game-meta"><span>ID: 0</span><span>Cost: ~16.6M Gas</span></div>
+          <p>Create and care for your virtual pet! All state is saved directly on the blockchain.</p>
+          <div class="game-meta"><span>Cost: ~16.6M Gas</span></div>
         </div>
         
         <div class="game-card" data-game="dice">
           <div class="game-icon">🎲</div>
           <h3>Dice Roller</h3>
           <p>Stateless RNG math simulation executed purely via Brainfuck commands.</p>
-          <div class="game-meta"><span>ID: 1</span><span>Cost: ~8M Gas</span></div>
+          <div class="game-meta"><span>Cost: ~8M Gas</span></div>
         </div>
         
         <div class="game-card" data-game="snake">
           <div class="game-icon">🐍</div>
           <h3>Snake</h3>
           <p>Classic snake on a 5×5 grid. Each move validated on-chain via BrainfuckVM.</p>
-          <div class="game-meta"><span>ID: 2</span><span>Cost: ~5M Gas</span></div>
+          <div class="game-meta"><span>Cost: ~5M Gas</span></div>
         </div>
 
         <div class="game-card" data-game="jokenpo">
           <div class="game-icon">✂️</div>
-          <h3>Jokenpo</h3>
-          <p>Rock Paper Scissors contra a máquina. Cada jogada é uma transação on-chain real.</p>
-          <div class="game-meta"><span>ID: 3</span><span>Custo: ~2M Gas</span></div>
+          <h3>Rock Paper Scissors</h3>
+          <p>Rock Paper Scissors against the machine. Each move is a real on-chain transaction.</p>
+          <div class="game-meta"><span>Cost: ~2M Gas</span></div>
         </div>
 
         <div class="game-card" data-game="contador">
           <div class="game-icon">⏲️</div>
           <h3>Inverted Counter</h3>
           <p>A weird counter that goes up/down. Uses persistent state.</p>
-          <div class="game-meta"><span>ID: 4</span><span>Cost: ~3M Gas</span></div>
+          <div class="game-meta"><span>Cost: ~3M Gas</span></div>
         </div>
         
         <div class="game-card" data-game="gameoflife">
           <div class="game-icon">🦠</div>
           <h3>Game of Life (3D)</h3>
           <p>Rule 102 Cellular Automaton. TPS stress test via staticCalls.</p>
-          <div class="game-meta"><span>ID: 5(?)</span><span>Legacy/Stress</span></div>
+          <div class="game-meta"><span>Legacy/Stress</span></div>
         </div>
       </div>
     `;
@@ -333,27 +333,27 @@ function render() {
     if (activeGame === 'jokenpo') {
       gc.innerHTML = `
         <div class="jokenpo-display">
-          <div class="jokenpo-result" id="jokenpo-res">ESCOLHA SUA JOGADA</div>
+          <div class="jokenpo-result" id="jokenpo-res">CHOOSE YOUR MOVE</div>
           <div class="jokenpo-reason" id="jokenpo-reason"></div>
           
           <div class="jokenpo-arena">
             <div class="jokenpo-side">
-              <div class="jokenpo-label">VOCÊ</div>
+              <div class="jokenpo-label">YOU</div>
               <div class="jokenpo-move-icon" id="my-move">?</div>
             </div>
             
             <div class="jokenpo-vs">VS</div>
             
             <div class="jokenpo-side">
-              <div class="jokenpo-label">OPONENTE</div>
+              <div class="jokenpo-label">OPPONENT</div>
               <div class="jokenpo-move-icon" id="opponent-move">?</div>
             </div>
           </div>
 
           <div class="jokenpo-choices">
-            <button class="choice-btn" data-move="0"><span class="icon">✊</span>Pedra</button>
-            <button class="choice-btn" data-move="1"><span class="icon">📄</span>Papel</button>
-            <button class="choice-btn" data-move="2"><span class="icon">✂️</span>Tesoura</button>
+            <button class="choice-btn" data-move="0"><span class="icon">✊</span>Rock</button>
+            <button class="choice-btn" data-move="1"><span class="icon">📄</span>Paper</button>
+            <button class="choice-btn" data-move="2"><span class="icon">✂️</span>Scissors</button>
           </div>
         </div>
       `;
@@ -373,17 +373,17 @@ function render() {
           <div class="contador-status" id="contador-status">READY FOR OPS</div>
           
           <div class="action-buttons">
-            <button id="cont-init" class="action-btn">REINICIAR (N=15)</button>
+            <button id="cont-init" class="action-btn">RESTART (N=15)</button>
             <div class="btn-group">
-              <button id="cont-sub" class="action-btn primary" data-action="1">SUBTRAIR (-1)</button>
-              <button id="cont-div" class="action-btn primary" data-action="2">DIVIDIR (/2)</button>
+              <button id="cont-sub" class="action-btn primary" data-action="1">SUBTRACT (-1)</button>
+              <button id="cont-div" class="action-btn primary" data-action="2">DIVIDE (/2)</button>
             </div>
           </div>
 
           <div class="contador-history">
-            <div class="history-title">HISTÓRICO DE TRANSAÇÕES</div>
+            <div class="history-title">TRANSACTION HISTORY</div>
             <div id="contador-tx-list" class="history-list">
-              <div class="history-empty">Nenhuma transação nesta sessão.</div>
+              <div class="history-empty">No transactions in this session.</div>
             </div>
           </div>
         </div>
@@ -395,22 +395,22 @@ function render() {
       gc.innerHTML = `
         <div class="playground-display">
           <div class="playground-editor-section">
-            <div class="section-label">CÓDIGO BRAINFUCK (.bf)</div>
-            <textarea id="bf-code" class="bf-editor" placeholder="Digite seu código Brainfuck aqui... Ex: ++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++."></textarea>
+            <div class="section-label">BRAINFUCK CODE (.bf)</div>
+            <textarea id="bf-code" class="bf-editor" placeholder="Enter your Brainfuck code here... Ex: ++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++."></textarea>
           </div>
 
           <div class="playground-editor-section">
-            <div class="section-label">INPUT DO PROGRAMA (Opcional)</div>
+            <div class="section-label">PROGRAM INPUT (Optional)</div>
             <input type="text" id="bf-input" class="bf-input-area" placeholder="Ex: ABC">
           </div>
 
           <div class="playground-controls">
-            <button id="bf-run" class="btn primary">EXECUTAR NA BLOCKCHAIN</button>
+            <button id="bf-run" class="btn primary">EXECUTE ON BLOCKCHAIN</button>
           </div>
 
           <div class="playground-result-section">
-            <div class="section-label">RESULTADO DA EXECUÇÃO</div>
-            <div id="bf-result" class="bf-result-display empty">O resultado aparecerá aqui após a confirmação da transação...</div>
+            <div class="section-label">EXECUTION RESULT</div>
+            <div id="bf-result" class="bf-result-display empty">The result will appear here after the transaction confirmation...</div>
           </div>
         </div>
       `;
@@ -783,12 +783,12 @@ async function snakeMove(dir: string) {
 // ─── Jokenpo On-Chain ────────────────
 
 function setupJokenpo() {
-  addLog('✂️ Jokenpo ready!', 'info');
+  addLog('✂️ Rock Paper Scissors ready!', 'info');
 }
 
 async function playJokenpo(playerMove: number) {
   const reg = getRegistryContract();
-  if (!reg) return addLog('Por favor, conecte a carteira.', 'error');
+  if (!reg) return addLog('Please connect your wallet.', 'error');
 
   const btnNodes = document.querySelectorAll('.choice-btn');
   btnNodes.forEach(b => (b as HTMLButtonElement).disabled = true);
@@ -799,9 +799,9 @@ async function playJokenpo(playerMove: number) {
   const reasonEl = document.getElementById('jokenpo-reason');
 
   const moves = [
-    { name: "Pedra", icon: "✊" },
-    { name: "Papel", icon: "📄" },
-    { name: "Tesoura", icon: "✂️" }
+    { name: "Rock", icon: "✊" },
+    { name: "Paper", icon: "📄" },
+    { name: "Scissors", icon: "✂️" }
   ];
 
   if (myMoveEl) {
@@ -812,22 +812,22 @@ async function playJokenpo(playerMove: number) {
     opponentMoveEl.innerHTML = "❓";
     opponentMoveEl.classList.remove('winner');
   }
-  if (resultEl) resultEl.innerHTML = "JO-KEN-PO...";
-  if (reasonEl) reasonEl.innerHTML = "Aguardando confirmação na MetaMask...";
+  if (resultEl) resultEl.innerHTML = "ROCK-PAPER-SCISSORS...";
+  if (reasonEl) reasonEl.innerHTML = "Waiting for confirmation in MetaMask...";
 
   try {
     const seed = Math.floor(Math.random() * 255);
     const input = ethers.hexlify(new Uint8Array([playerMove, seed]));
     
-    addLog(`[Jokenpo] Iniciando transação: ${moves[playerMove].name} vs ?`, 'info');
+    addLog(`[Rock Paper Scissors] Initiating transaction: ${moves[playerMove].name} vs ?`, 'info');
     
     // Send real transaction
     const tx = await reg.play(GAMES.jokenpo.id, input, 200_000);
-    addLog(`Transação enviada! Hash: ${tx.hash.substring(0, 18)}...`, 'success');
-    addLog(`Minerando na Monad Testnet...`, 'info');
+    addLog(`Transaction sent! Hash: ${tx.hash.substring(0, 18)}...`, 'success');
+    addLog(`Mining on Monad Testnet...`, 'info');
     
     const receipt = await tx.wait();
-    addLog(`Confirmado! Bloco: ${receipt.blockNumber} | Gas: ${receipt.gasUsed.toString()}`, 'success');
+    addLog(`Confirmed! Block: ${receipt.blockNumber} | Gas: ${receipt.gasUsed.toString()}`, 'success');
 
     // To show result, we can either parse logs or do a staticCall (since the state changed, or just to get the value)
     // Here we parse the GamePlayed event
@@ -848,25 +848,25 @@ async function playJokenpo(playerMove: number) {
 
     if (resultEl) {
       if (result === 0) {
-        resultEl.innerHTML = "🤝 EMPATE";
-        if (reasonEl) reasonEl.innerHTML = `${moves[playerMove].name} empata com ${moves[opponentMove].name}`;
-        addLog(`Resultado: EMPATE! Ambos jogaram ${moves[playerMove].name}.`, 'info');
+        resultEl.innerHTML = "🤝 DRAW";
+        if (reasonEl) reasonEl.innerHTML = `${moves[playerMove].name} draws with ${moves[opponentMove].name}`;
+        addLog(`Result: DRAW! Both played ${moves[playerMove].name}.`, 'info');
       } else if (result === 1) {
-        resultEl.innerHTML = "🎉 VOCÊ VENCEU!";
+        resultEl.innerHTML = "🎉 YOU WON!";
         if (myMoveEl) myMoveEl.classList.add('winner');
-        if (reasonEl) reasonEl.innerHTML = `${moves[playerMove].name} vence ${moves[opponentMove].name}`;
-        addLog(`Resultado: VITÓRIA! ${moves[playerMove].name} vence ${moves[opponentMove].name}.`, 'success');
+        if (reasonEl) reasonEl.innerHTML = `${moves[playerMove].name} beats ${moves[opponentMove].name}`;
+        addLog(`Result: VICTORY! ${moves[playerMove].name} beats ${moves[opponentMove].name}.`, 'success');
       } else {
-        resultEl.innerHTML = "💀 VOCÊ PERDEU";
+        resultEl.innerHTML = "💀 YOU LOST";
         if (opponentMoveEl) opponentMoveEl.classList.add('winner');
-        if (reasonEl) reasonEl.innerHTML = `${moves[opponentMove].name} vence ${moves[playerMove].name}`;
-        addLog(`Resultado: DERROTA! ${moves[opponentMove].name} vence ${moves[playerMove].name}.`, 'error');
+        if (reasonEl) reasonEl.innerHTML = `${moves[opponentMove].name} beats ${moves[playerMove].name}`;
+        addLog(`Result: DEFEAT! ${moves[opponentMove].name} beats ${moves[playerMove].name}.`, 'error');
       }
     }
   } catch (e: any) { 
-    addLog('Falha na transação: ' + (e.reason || e.message), 'error'); 
-    if (resultEl) resultEl.innerHTML = "CANCELADO";
-    if (reasonEl) reasonEl.innerHTML = "Transação rejeitada ou falhou.";
+    addLog('Transaction failed: ' + (e.reason || e.message), 'error'); 
+    if (resultEl) resultEl.innerHTML = "CANCELLED";
+    if (reasonEl) reasonEl.innerHTML = "Transaction rejected or failed.";
   } finally {
     btnNodes.forEach(b => (b as HTMLButtonElement).disabled = false);
   }
@@ -933,27 +933,27 @@ function setupContadorEvents() {
     const reg = getRegistryContract();
     if (!reg) return addLog('Please connect wallet.', 'error');
     
-    const actionName = action === 1 ? "SUBTRAIR (-1)" : "DIVIDIR (/2)";
+    const actionName = action === 1 ? "SUBTRACT (-1)" : "DIVIDE (/2)";
     setPending(true);
     
     try {
-      addLog(`[Contador] Iniciando transação: ${actionName}`, 'info');
+      addLog(`[Contador] Initiating transaction: ${actionName}`, 'info');
       const input = ethers.hexlify(new Uint8Array([action]));
       
       const tx = await reg.playWithState(GAMES.contador.id, input, 150_000);
-      addLog(`Transação enviada! Hash: ${tx.hash.substring(0, 18)}...`, 'success');
+      addLog(`Transaction sent! Hash: ${tx.hash.substring(0, 18)}...`, 'success');
       addTxToHistory(tx.hash, actionName, 'pending');
       
       const receipt = await tx.wait();
       if (receipt) {
-        addLog(`Confirmado! Bloco: ${receipt.blockNumber} | Gas: ${receipt.gasUsed.toString()}`, 'success');
+        addLog(`Confirmed! Block: ${receipt.blockNumber} | Gas: ${receipt.gasUsed.toString()}`, 'success');
         addTxToHistory(tx.hash, actionName, 'success');
       }
       
       await setupContador();
     } catch (e: any) { 
       const msg = e.reason || e.message;
-      addLog('Falha na transação: ' + msg, 'error'); 
+      addLog('Transaction failed: ' + msg, 'error'); 
       addTxToHistory('0x...', actionName, 'error');
     } finally {
       setPending(false);
@@ -966,18 +966,18 @@ function setupContadorEvents() {
     
     setPending(true);
     try {
-      addLog('[Contador] Reiniciando estado para N=15...', 'info');
+      addLog('[Contador] Resetting state to N=15...', 'info');
       const tx = await reg["initState(uint256,bytes)"](GAMES.contador.id, "0x0f"); // 15
-      addLog(`Transação de Reset enviada!`, 'success');
+      addLog(`Reset transaction sent!`, 'success');
       addTxToHistory(tx.hash, "RESET (15)", 'pending');
       
       await tx.wait();
-      addLog(`Estado reiniciado com sucesso.`, 'success');
+      addLog(`State successfully reset.`, 'success');
       addTxToHistory(tx.hash, "RESET (15)", 'success');
       
       await setupContador();
     } catch (e: any) { 
-      addLog('Erro no reset: ' + (e.reason || e.message), 'error'); 
+      addLog('Reset error: ' + (e.reason || e.message), 'error'); 
     } finally {
       setPending(false);
     }
@@ -1008,7 +1008,7 @@ function removeSnakeKeyboard() {
 // ─── Brainfuck Playground ──────────
 
 async function setupPlayground() {
-  addLog('Pronto para compilar e executar código Brainfuck na Blockchain!', 'info');
+  addLog('Ready to compile and execute Brainfuck code on the Blockchain!', 'info');
 }
 
 function setupPlaygroundEvents() {
@@ -1019,30 +1019,30 @@ function setupPlaygroundEvents() {
 
   runBtn?.addEventListener('click', async () => {
     const code = codeArea.value.trim();
-    if (!code) return addLog('Por favor, insira o código Brainfuck.', 'error');
+    if (!code) return addLog('Please enter Brainfuck code.', 'error');
 
     const vm = getVMContract();
-    if (!vm) return addLog('Por favor, conecte a carteira.', 'error');
+    if (!vm) return addLog('Please connect your wallet.', 'error');
 
     const inputStr = inputArea.value;
     const inputBytes = new TextEncoder().encode(inputStr);
     const codeBytes = new TextEncoder().encode(code);
 
     try {
-      addLog('[Playground] Iniciando execução na Monad...', 'info');
+      addLog('[Playground] Executing on Monad...', 'info');
       if (runBtn) (runBtn as HTMLButtonElement).disabled = true;
       if (resultDisplay) {
-        resultDisplay.innerHTML = '⏳ Executando transação...';
+        resultDisplay.innerHTML = '⏳ Executing transaction...';
         resultDisplay.classList.remove('empty');
       }
 
       // We use run() which is state-changing (emits events)
       // BrainfuckVM.run(bytes program, bytes input, uint256 maxSteps)
       const tx = await vm.run(ethers.hexlify(codeBytes), ethers.hexlify(inputBytes), 1_000_000);
-      addLog(`Transação enviada! Hash: ${tx.hash.substring(0, 18)}...`, 'success');
+      addLog(`Transaction sent! Hash: ${tx.hash.substring(0, 18)}...`, 'success');
       
       const receipt = await tx.wait();
-      addLog(`Execução concluída! Gas: ${receipt.gasUsed.toString()}`, 'success');
+      addLog(`Execution completed! Gas: ${receipt.gasUsed.toString()}`, 'success');
 
       // Parse output from ProgramExecuted event
       let outputHex = '0x';
@@ -1060,14 +1060,14 @@ function setupPlaygroundEvents() {
       const outputText = new TextDecoder().decode(outputBytes);
       
       if (resultDisplay) {
-        resultDisplay.innerHTML = outputText || '(Nenhuma saída gerada)';
+        resultDisplay.innerHTML = outputText || '(No output generated)';
       }
-      addLog(`Resultado: ${outputText || 'vazio'}`, 'success');
+      addLog(`Result: ${outputText || 'empty'}`, 'success');
 
     } catch (e: any) {
       const msg = e.reason || e.message;
-      addLog('Falha na execução: ' + msg, 'error');
-      if (resultDisplay) resultDisplay.innerHTML = 'Erro: ' + msg;
+      addLog('Execution failed: ' + msg, 'error');
+      if (resultDisplay) resultDisplay.innerHTML = 'Error: ' + msg;
     } finally {
       if (runBtn) (runBtn as HTMLButtonElement).disabled = false;
     }
