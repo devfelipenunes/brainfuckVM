@@ -10,10 +10,10 @@ contract BrainfuckVM {
     // ──────────────────────────────────────────────
     //  Errors
     // ──────────────────────────────────────────────
-    error PointerOverflow();
-    error PointerUnderflow();
-    error MaxStepsExceeded();
-    error UnmatchedBracket();
+    error PointerOverflow();     // 0x26aaeb27
+    error PointerUnderflow();    // 0x3bf08bad
+    error MaxStepsExceeded();    // 0xf47200c4
+    error UnmatchedBracket();     // 0xccba53b7
 
     // ──────────────────────────────────────────────
     //  Events
@@ -79,12 +79,6 @@ contract BrainfuckVM {
         bytes memory jumpTable = _buildJumpTable(program);
         
         assembly {
-            // Memory Layout:
-            // [0x00-0x3f]: Scratch
-            // [0x40]: Free memory pointer
-            // [tape]: Data tape (uint8 array)
-            // [output]: Output bridge (bytes)
-
             let tape := mload(0x40)
             
             // Allocate 30,000 bytes for tape + padding
@@ -93,7 +87,7 @@ contract BrainfuckVM {
 
             output := mload(0x40)
             mstore(output, 0)
-            mstore(0x40, add(output, 2080)) // Initial output buffer (2k)
+            mstore(0x40, add(output, 4096)) // Initial output buffer (4k)
 
             let cursor := 0
             let ptr := tape
@@ -109,7 +103,7 @@ contract BrainfuckVM {
                 if iszero(and(steps, 0x3f)) {
                     if gt(steps, maxSteps) {
                         let ptr_err := mload(0x40)
-                        mstore(ptr_err, 0xee41a16d00000000000000000000000000000000000000000000000000000000)
+                        mstore(ptr_err, 0xf47200c400000000000000000000000000000000000000000000000000000000)
                         revert(ptr_err, 4)
                     }
                 }
@@ -130,9 +124,19 @@ contract BrainfuckVM {
                 switch op
                 case 0x3e { 
                     ptr := add(ptr, count)
+                    if iszero(lt(ptr, add(tape, 30000))) {
+                        let ptr_err := mload(0x40)
+                        mstore(ptr_err, 0x26aaeb2700000000000000000000000000000000000000000000000000000000)
+                        revert(ptr_err, 4)
+                    }
                     cursor := add(cursor, count)
                 }
                 case 0x3c { 
+                    if lt(ptr, add(tape, count)) {
+                        let ptr_err := mload(0x40)
+                        mstore(ptr_err, 0x3bf08bad00000000000000000000000000000000000000000000000000000000)
+                        revert(ptr_err, 4)
+                    }
                     ptr := sub(ptr, count)
                     cursor := add(cursor, count)
                 }
@@ -181,13 +185,6 @@ contract BrainfuckVM {
                 }
             }
             
-            // Bounds check
-            if or(lt(ptr, tape), gt(ptr, add(tape, 30000))) {
-                let ptr_err := mload(0x40)
-                mstore(ptr_err, 0x6e26715800000000000000000000000000000000000000000000000000000000)
-                revert(ptr_err, 4)
-            }
-
             mstore(output, outLen)
             mstore(0x40, add(output, add(32, outLen)))
         }
@@ -220,7 +217,7 @@ contract BrainfuckVM {
                 if eq(op, 0x5d) {
                     if iszero(stackPtr) {
                         let ptr_err := mload(0x40)
-                        mstore(ptr_err, 0x3bf08bad00000000000000000000000000000000000000000000000000000000)
+                        mstore(ptr_err, 0xccba53b700000000000000000000000000000000000000000000000000000000)
                         revert(ptr_err, 4)
                     }
                     stackPtr := sub(stackPtr, 1)
@@ -235,6 +232,13 @@ contract BrainfuckVM {
                     mstore8(add(jumpBase, p2), shr(8, startPos))
                     mstore8(add(jumpBase, add(p2, 1)), and(startPos, 0xff))
                 }
+            }
+            
+            // Check for unmatched open brackets
+            if iszero(iszero(stackPtr)) {
+                let ptr_err := mload(0x40)
+                mstore(ptr_err, 0xccba53b700000000000000000000000000000000000000000000000000000000)
+                revert(ptr_err, 4)
             }
         }
     }
