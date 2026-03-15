@@ -30,7 +30,6 @@ The project features a modular architecture where the VM serves as the execution
 |----------|-------------|
 | `BrainfuckVM.sol` | Optimized assembly on-chain interpreter (all 8 commands, 30,000 cell tape). |
 | `CartridgeRegistry.sol` | Game management system. Handles game registration, persistent player saves, and game logic execution. |
-| `BrainfuckL2.sol` | Conceptual L2 rollup — batch submission, fraud proofs, state finalization. |
 
 ## Quick Start
 
