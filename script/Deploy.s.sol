@@ -51,6 +51,14 @@ contract Deploy is Script {
         uint256 contadorId = registry.loadCartridge(contador, "Inverted Counter");
         console.log("Inverted Counter cartridge ID:", contadorId);
 
+        // ─── Register Game of Life Cartridge ───
+        string memory root = vm.projectRoot();
+        string memory path = string.concat(root, "/scripts/gameoflife_1000_hex.txt");
+        string memory hexContent = vm.readFile(path);
+        bytes memory golBytes = vm.parseBytes(string.concat("0x", hexContent));
+        uint256 golId = registry.loadCartridge(golBytes, "Game of Life");
+        console.log("Game of Life cartridge ID:", golId);
+
         // Run test: Hello World to verify VM
         bytes memory helloWorld = bytes(
             "++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]"

@@ -14,13 +14,13 @@ const GAMES = {
   jokenpo:    { id: 3, title: "Rock Paper Scissors", type: "stateless" }, // Rock Paper Scissors
   contador:   { id: 4, title: "Inverted Counter", type: "stateful" },
   playground: { id: 99, title: "Playground", type: "playground" },
-  gameoflife: { id: 5, title: "Game of Life", type: "stresstest" }, // If we ever re-add it
+  gameoflife: { id: 6, title: "Game of Life", type: "stresstest" }, // If we ever re-add it
 };
 
 // ─── State ────────────────────────
 
 let activeGame: string | null = null;
-let txLogs: {msg: string, type: 'info'|'success'|'error', time: string}[] = [];
+let txLogs: {msg: string, type: 'info'|'success'|'error', time: string, txHash?: string}[] = [];
 
 // Tamagotchi
 let petState = { hunger: 50, happiness: 50, energy: 50, age: 0, dead: false };
@@ -173,7 +173,12 @@ function render() {
         <div id="game-container"></div>
         
         <div class="console-log">
-          ${txLogs.map(l => `<div class="log-entry ${l.type}"><span class="timestamp">[${l.time}]</span>${l.msg}</div>`).join('')}
+          ${txLogs.map(l => {
+            const explorerLink = (l.txHash && getNetworkType() === 'monad') 
+              ? ` <a href="https://testnet.monadexplorer.com/tx/${l.txHash}" target="_blank" class="tx-link">🔗 View</a>` 
+              : '';
+            return `<div class="log-entry ${l.type}"><span class="timestamp">[${l.time}]</span>${l.msg}${explorerLink}</div>`;
+          }).join('')}
         </div>
       </div>
     `;
@@ -396,7 +401,7 @@ function render() {
         <div class="playground-display">
           <div class="playground-editor-section">
             <div class="section-label">BRAINFUCK CODE (.bf)</div>
-            <textarea id="bf-code" class="bf-editor" placeholder="Enter your Brainfuck code here... Ex: ++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++."></textarea>
+            <textarea id="bf-code" class="bf-editor" placeholder="Enter your Brainfuck code here... Ex: ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.+++++++++++++++++++++++++++++.+++++++..+++.-------------------------------------------------------------------------------.+++++++++++++++++++++++++++++++++++++++++++++.++++++++++++++++++++++++++++++++++.-.-------------.+++.--------------------------------------------------------------------.++++++++++++++++++++++++++++++++++.++++++++++++++++++++++++++++++++++++++++++.---.+++++++++++.++++++.-----------------------------------------------------------------------------------------.">++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.+++++++++++++++++++++++++++++.+++++++..+++.-------------------------------------------------------------------------------.+++++++++++++++++++++++++++++++++++++++++++++.++++++++++++++++++++++++++++++++++.-.-------------.+++.--------------------------------------------------------------------.++++++++++++++++++++++++++++++++++.++++++++++++++++++++++++++++++++++++++++++.---.+++++++++++.++++++.-----------------------------------------------------------------------------------------.</textarea>
           </div>
 
           <div class="playground-editor-section">
@@ -423,16 +428,19 @@ function render() {
   }
 }
 
-function addLog(msg: string, type: 'info'|'success'|'error' = 'info') {
+function addLog(msg: string, type: 'info'|'success'|'error' = 'info', txHash?: string) {
   const time = new Date().toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
-  txLogs.push({ msg, type, time });
+  txLogs.push({ msg, type, time, txHash });
   if (txLogs.length > 20) txLogs.shift();
   
   const logDiv = document.querySelector('.console-log');
   if (logDiv) {
     const entry = document.createElement('div');
     entry.className = `log-entry ${type}`;
-    entry.innerHTML = `<span class="timestamp">[${time}]</span>${msg}`;
+    const explorerLink = (txHash && getNetworkType() === 'monad') 
+      ? ` <a href="https://testnet.monadexplorer.com/tx/${txHash}" target="_blank" class="tx-link">🔗 View</a>` 
+      : '';
+    entry.innerHTML = `<span class="timestamp">[${time}]</span>${msg}${explorerLink}`;
     logDiv.appendChild(entry);
     logDiv.scrollTop = logDiv.scrollHeight;
   }
@@ -485,7 +493,7 @@ function setupTamagotchiEvents() {
     try {
       addLog('Tx: Initializing cartridge state (ID 0)...', 'info');
       const tx = await reg["initState(uint256)"](GAMES.tamagotchi.id);
-      addLog(`Mined! Hash: ${tx.hash.substring(0, 10)}...`, 'success');
+      addLog(`Mined! Hash: ${tx.hash.substring(0, 10)}...`, 'success', tx.hash);
       await tx.wait();
       addLog('State initialized on-chain!', 'success');
       await setupTamagotchi();
@@ -499,7 +507,7 @@ function setupTamagotchiEvents() {
       addLog(`Tx: Sending Action ${actionId} via playWithState()...`, 'info');
       const input = ethers.hexlify(new Uint8Array([actionId]));
       const tx = await reg.playWithState(GAMES.tamagotchi.id, input, 100_000);
-      addLog(`Tx Mined! Hash: ${tx.hash.substring(0, 10)}...`, 'success');
+      addLog(`Tx Mined! Hash: ${tx.hash.substring(0, 10)}...`, 'success', tx.hash);
       await tx.wait();
       addLog(`Action applied to Monad state!`, 'success');
       await setupTamagotchi();
@@ -531,7 +539,7 @@ async function diceRoll() {
         
         // Send actual transaction
         const tx = await reg.play(GAMES.dice.id, inputHex, 50_000);
-        addLog(`Waiting for confirmation... Hash: ${tx.hash.substring(0, 10)}`, 'info');
+        addLog(`Waiting for confirmation... Hash: ${tx.hash.substring(0, 10)}`, 'info', tx.hash);
         const receipt = await tx.wait();
         
         // Extract output from GamePlayed event
@@ -596,7 +604,7 @@ async function golStep(isAuto = false) {
     
     const inputHex = ethers.hexlify(new Uint8Array(golCells));
     
-    const outputHex = await reg.play.staticCall(GAMES.gameoflife.id, inputHex, 1_500_000);
+    const outputHex = await reg.play.staticCall(GAMES.gameoflife.id, inputHex, 10_000_000);
     const outputBytes = ethers.getBytes(outputHex);
     
     // If we stopped the auto mode while this was inflight, ignore the result
@@ -823,11 +831,13 @@ async function playJokenpo(playerMove: number) {
     
     // Send real transaction
     const tx = await reg.play(GAMES.jokenpo.id, input, 200_000);
-    addLog(`Transaction sent! Hash: ${tx.hash.substring(0, 18)}...`, 'success');
+    addLog(`Transaction sent! Hash: ${tx.hash.substring(0, 18)}...`, 'success', tx.hash);
     addLog(`Mining on Monad Testnet...`, 'info');
     
     const receipt = await tx.wait();
-    addLog(`Confirmed! Block: ${receipt.blockNumber} | Gas: ${receipt.gasUsed.toString()}`, 'success');
+    if (receipt) {
+      addLog(`Confirmed! Block: ${receipt.blockNumber} | Gas: ${receipt.gasUsed.toString()}`, 'success', tx.hash);
+    }
 
     // To show result, we can either parse logs or do a staticCall (since the state changed, or just to get the value)
     // Here we parse the GamePlayed event
@@ -920,9 +930,13 @@ function setupContadorEvents() {
     
     const entry = document.createElement('div');
     entry.className = `history-entry ${status}`;
+    const hashDisplay = (getNetworkType() === 'monad') 
+      ? `<a href="https://testnet.monadexplorer.com/tx/${hash}" target="_blank" class="hash-link">${hash.substring(0, 10)}...</a>`
+      : `<span class="hash-only">${hash.substring(0, 10)}...</span>`;
+
     entry.innerHTML = `
       <span class="action">${action}</span>
-      <span class="hash">${hash.substring(0, 10)}...</span>
+      <span class="hash">${hashDisplay}</span>
       <span class="status-icon">${status === 'pending' ? '⏳' : status === 'success' ? '✅' : '❌'}</span>
     `;
     list.prepend(entry);
@@ -941,12 +955,12 @@ function setupContadorEvents() {
       const input = ethers.hexlify(new Uint8Array([action]));
       
       const tx = await reg.playWithState(GAMES.contador.id, input, 150_000);
-      addLog(`Transaction sent! Hash: ${tx.hash.substring(0, 18)}...`, 'success');
+      addLog(`Transaction sent! Hash: ${tx.hash.substring(0, 18)}...`, 'success', tx.hash);
       addTxToHistory(tx.hash, actionName, 'pending');
       
       const receipt = await tx.wait();
       if (receipt) {
-        addLog(`Confirmed! Block: ${receipt.blockNumber} | Gas: ${receipt.gasUsed.toString()}`, 'success');
+        addLog(`Confirmed! Block: ${receipt.blockNumber} | Gas: ${receipt.gasUsed.toString()}`, 'success', tx.hash);
         addTxToHistory(tx.hash, actionName, 'success');
       }
       
@@ -968,11 +982,11 @@ function setupContadorEvents() {
     try {
       addLog('[Contador] Resetting state to N=15...', 'info');
       const tx = await reg["initState(uint256,bytes)"](GAMES.contador.id, "0x0f"); // 15
-      addLog(`Reset transaction sent!`, 'success');
+      addLog(`Reset transaction sent!`, 'success', tx.hash);
       addTxToHistory(tx.hash, "RESET (15)", 'pending');
       
       await tx.wait();
-      addLog(`State successfully reset.`, 'success');
+      addLog(`State successfully reset.`, 'success', tx.hash);
       addTxToHistory(tx.hash, "RESET (15)", 'success');
       
       await setupContador();
@@ -1039,10 +1053,10 @@ function setupPlaygroundEvents() {
       // We use run() which is state-changing (emits events)
       // BrainfuckVM.run(bytes program, bytes input, uint256 maxSteps)
       const tx = await vm.run(ethers.hexlify(codeBytes), ethers.hexlify(inputBytes), 1_000_000);
-      addLog(`Transaction sent! Hash: ${tx.hash.substring(0, 18)}...`, 'success');
+      addLog(`Transaction sent! Hash: ${tx.hash.substring(0, 18)}...`, 'success', tx.hash);
       
       const receipt = await tx.wait();
-      addLog(`Execution completed! Gas: ${receipt.gasUsed.toString()}`, 'success');
+      addLog(`Execution completed! Gas: ${receipt.gasUsed.toString()}`, 'success', tx.hash);
 
       // Parse output from ProgramExecuted event
       let outputHex = '0x';

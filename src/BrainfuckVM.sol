@@ -106,7 +106,7 @@ contract BrainfuckVM {
         bytes calldata program,
         bytes calldata input,
         uint256 maxSteps
-    ) public pure returns (bytes memory output) {
+    ) public view returns (bytes memory output) {
         if (program.length == 0) return new bytes(0);
         if (uint8(program[0]) <= 9) return executeCompiled(program, input, maxSteps);
         
@@ -120,18 +120,22 @@ contract BrainfuckVM {
         bytes calldata bytecode,
         bytes calldata input,
         uint256 maxSteps
-    ) public pure returns (bytes memory output) {
+    ) public view returns (bytes memory output) {
         uint256 progLen = bytecode.length;
         if (progLen == 0) return new bytes(0);
 
+        uint256 tSize = tapeSize;
+
         assembly {
             let tape := mload(0x40)
-            mstore(0x40, add(tape, 10048))
-            codecopy(tape, codesize(), 10048)
+            let i := 0
+            for { } lt(i, tSize) { i := add(i, 32) } {
+                mstore(add(tape, i), 0)
+            }
 
-            output := mload(0x40)
+            output := add(tape, tSize)
             mstore(output, 0)
-            mstore(0x40, add(output, 2080))
+            mstore(0x40, add(output, 8192))
 
             let ptr := tape
             let inputPtr := 0
@@ -146,9 +150,19 @@ contract BrainfuckVM {
             for { let cursor := progBase } lt(cursor, endPtr) { } {
                 if iszero(and(steps, 0x3f)) {
                     if gt(steps, maxSteps) {
-                        let ptr_err := mload(0x40) // MaxStepsExceeded()
+                        let ptr_err := mload(0x40)
                         mstore(ptr_err, 0xf47200c400000000000000000000000000000000000000000000000000000000)
-                        revert(ptr_err, 4)
+                        revert(ptr_err, 32)
+                    }
+                    if gt(ptr, add(tape, tSize)) {
+                        let ptr_err := mload(0x40)
+                        mstore(ptr_err, 0x26aaeb2700000000000000000000000000000000000000000000000000000000)
+                        revert(ptr_err, 32)
+                    }
+                    if lt(ptr, tape) {
+                        let ptr_err := mload(0x40)
+                        mstore(ptr_err, 0x3bf08bad00000000000000000000000000000000000000000000000000000000)
+                        revert(ptr_err, 32)
                     }
                 }
                 steps := add(steps, 1)
@@ -158,14 +172,8 @@ contract BrainfuckVM {
                 let arg := and(inst, 0xFFFFFF)
                 
                 switch op
-                case 1 { 
-                    ptr := add(ptr, arg)
-                    cursor := add(cursor, 4)
-                }
-                case 2 { 
-                    ptr := sub(ptr, arg)
-                    cursor := add(cursor, 4)
-                }
+                case 1 { ptr := add(ptr, arg) cursor := add(cursor, 4) }
+                case 2 { ptr := sub(ptr, arg) cursor := add(cursor, 4) }
                 case 3 { 
                     mstore8(ptr, add(byte(0, mload(ptr)), arg))
                     cursor := add(cursor, 4)
@@ -189,25 +197,14 @@ contract BrainfuckVM {
                     cursor := add(cursor, 4)
                 }
                 case 7 {
-                    if iszero(byte(0, mload(ptr))) {
-                        cursor := add(progBase, mul(arg, 4))
-                    }
-                    if byte(0, mload(ptr)) {
-                        cursor := add(cursor, 4)
-                    }
+                    if iszero(byte(0, mload(ptr))) { cursor := add(progBase, mul(arg, 4)) }
+                    if byte(0, mload(ptr)) { cursor := add(cursor, 4) }
                 }
                 case 8 {
-                    if iszero(iszero(byte(0, mload(ptr)))) {
-                        cursor := add(progBase, mul(arg, 4))
-                    }
-                    if iszero(byte(0, mload(ptr))) {
-                        cursor := add(cursor, 4)
-                    }
+                    if iszero(iszero(byte(0, mload(ptr)))) { cursor := add(progBase, mul(arg, 4)) }
+                    if iszero(byte(0, mload(ptr))) { cursor := add(cursor, 4) }
                 }
-                case 9 {
-                    mstore8(ptr, 0)
-                    cursor := add(cursor, 4)
-                }
+                case 9 { mstore8(ptr, 0) cursor := add(cursor, 4) }
                 case 10 {
                     let val := byte(0, mload(ptr))
                     mstore8(ptr, 0)
@@ -222,22 +219,9 @@ contract BrainfuckVM {
                     mstore8(leftPtr, add(byte(0, mload(leftPtr)), val))
                     cursor := add(cursor, 4)
                 }
-                default {
-                    cursor := add(cursor, 4)
-                }
+                default { cursor := add(cursor, 4) }
             }
             
-            if gt(ptr, add(tape, 10000)) {
-                let ptr_err := mload(0x40) // PointerOverflow()
-                mstore(ptr_err, 0x26aaeb2700000000000000000000000000000000000000000000000000000000)
-                revert(ptr_err, 4)
-            }
-            if lt(ptr, tape) {
-                let ptr_err := mload(0x40) // PointerUnderflow()
-                mstore(ptr_err, 0x3bf08bad00000000000000000000000000000000000000000000000000000000)
-                revert(ptr_err, 4)
-            }
-
             mstore(output, outLen)
             mstore(0x40, add(output, add(32, outLen)))
         }
@@ -248,18 +232,22 @@ contract BrainfuckVM {
         bytes memory bytecode,
         bytes calldata input,
         uint256 maxSteps
-    ) internal pure returns (bytes memory output) {
+    ) internal view returns (bytes memory output) {
         uint256 progLen = bytecode.length;
         if (progLen == 0) return new bytes(0);
 
+        uint256 tSize = tapeSize;
+
         assembly {
             let tape := mload(0x40)
-            mstore(0x40, add(tape, 10048))
-            codecopy(tape, codesize(), 10048)
+            let i := 0
+            for { } lt(i, tSize) { i := add(i, 32) } {
+                mstore(add(tape, i), 0)
+            }
 
-            output := mload(0x40)
+            output := add(tape, tSize)
             mstore(output, 0)
-            mstore(0x40, add(output, 2080))
+            mstore(0x40, add(output, 8192))
 
             let ptr := tape
             let inputPtr := 0
@@ -276,7 +264,17 @@ contract BrainfuckVM {
                     if gt(steps, maxSteps) {
                         let ptr_err := mload(0x40)
                         mstore(ptr_err, 0xf47200c400000000000000000000000000000000000000000000000000000000)
-                        revert(ptr_err, 4)
+                        revert(ptr_err, 32)
+                    }
+                    if gt(ptr, add(tape, tSize)) {
+                        let ptr_err := mload(0x40)
+                        mstore(ptr_err, 0x26aaeb2700000000000000000000000000000000000000000000000000000000)
+                        revert(ptr_err, 32)
+                    }
+                    if lt(ptr, tape) {
+                        let ptr_err := mload(0x40)
+                        mstore(ptr_err, 0x3bf08bad00000000000000000000000000000000000000000000000000000000)
+                        revert(ptr_err, 32)
                     }
                 }
                 steps := add(steps, 1)
@@ -286,14 +284,8 @@ contract BrainfuckVM {
                 let arg := and(inst, 0xFFFFFF)
                 
                 switch op
-                case 1 { 
-                    ptr := add(ptr, arg)
-                    cursor := add(cursor, 4)
-                }
-                case 2 { 
-                    ptr := sub(ptr, arg)
-                    cursor := add(cursor, 4)
-                }
+                case 1 { ptr := add(ptr, arg) cursor := add(cursor, 4) }
+                case 2 { ptr := sub(ptr, arg) cursor := add(cursor, 4) }
                 case 3 { 
                     mstore8(ptr, add(byte(0, mload(ptr)), arg))
                     cursor := add(cursor, 4)
@@ -317,25 +309,14 @@ contract BrainfuckVM {
                     cursor := add(cursor, 4)
                 }
                 case 7 {
-                    if iszero(byte(0, mload(ptr))) {
-                        cursor := add(progBase, mul(arg, 4))
-                    }
-                    if byte(0, mload(ptr)) {
-                        cursor := add(cursor, 4)
-                    }
+                    if iszero(byte(0, mload(ptr))) { cursor := add(progBase, mul(arg, 4)) }
+                    if byte(0, mload(ptr)) { cursor := add(cursor, 4) }
                 }
                 case 8 {
-                    if iszero(iszero(byte(0, mload(ptr)))) {
-                        cursor := add(progBase, mul(arg, 4))
-                    }
-                    if iszero(byte(0, mload(ptr))) {
-                        cursor := add(cursor, 4)
-                    }
+                    if iszero(iszero(byte(0, mload(ptr)))) { cursor := add(progBase, mul(arg, 4)) }
+                    if iszero(byte(0, mload(ptr))) { cursor := add(cursor, 4) }
                 }
-                case 9 {
-                    mstore8(ptr, 0)
-                    cursor := add(cursor, 4)
-                }
+                case 9 { mstore8(ptr, 0) cursor := add(cursor, 4) }
                 case 10 {
                     let val := byte(0, mload(ptr))
                     mstore8(ptr, 0)
@@ -350,22 +331,9 @@ contract BrainfuckVM {
                     mstore8(leftPtr, add(byte(0, mload(leftPtr)), val))
                     cursor := add(cursor, 4)
                 }
-                default {
-                    cursor := add(cursor, 4)
-                }
+                default { cursor := add(cursor, 4) }
             }
             
-            if gt(ptr, add(tape, 10000)) {
-                let ptr_err := mload(0x40)
-                mstore(ptr_err, 0x26aaeb2700000000000000000000000000000000000000000000000000000000)
-                revert(ptr_err, 4)
-            }
-            if lt(ptr, tape) {
-                let ptr_err := mload(0x40)
-                mstore(ptr_err, 0x3bf08bad00000000000000000000000000000000000000000000000000000000)
-                revert(ptr_err, 4)
-            }
-
             mstore(output, outLen)
             mstore(0x40, add(output, add(32, outLen)))
         }

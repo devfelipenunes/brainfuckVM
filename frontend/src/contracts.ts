@@ -40,6 +40,6 @@ export const REGISTRY_ABI = [
 export const CONTRACTS = {
   VM: '0xa935a455314c58bC4773Ffb3570b1C1f2249222c',
   REGISTRY: '0x9b9fd1Ae43Ff12c2f43d131fd777ad21D3e69Da9',
-  VM_LOCAL: '0x045857BDEAE7C1c7252d611eB24eB55564198b4C', // Fallback defaults, user can update
-  REGISTRY_LOCAL: '0x2b5A4e5493d4a54E717057B127cf0C000C876f9B', // Commonly deployed address
+  VM_LOCAL: '0x7A9Ec1d04904907De0ED7b6839CcdD59c3716AC9', // Fallback defaults, user can update
+  REGISTRY_LOCAL: '0x49fd2BE640DB2910c2fAb69bB8531Ab6E76127ff', // Commonly deployed address
 };

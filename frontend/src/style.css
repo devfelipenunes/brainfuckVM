@@ -489,6 +489,27 @@ body::after {
 .log-entry.info { color: var(--info); }
 .log-entry .timestamp { opacity: 0.4; margin-right: 12px; font-size: 11px; }
 
+.tx-link {
+  color: var(--accent);
+  text-decoration: none;
+  margin-left: 8px;
+  font-weight: bold;
+  opacity: 0.8;
+  transition: all 0.2s ease;
+  font-size: 10px;
+  border: 1px solid rgba(131, 110, 249, 0.2);
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: rgba(131, 110, 249, 0.05);
+}
+
+.tx-link:hover {
+  opacity: 1;
+  background: rgba(131, 110, 249, 0.15);
+  border-color: var(--accent);
+  box-shadow: 0 0 10px var(--accent-glow);
+}
+
 /* ─── Scrollbar ──────────────────── */
 ::-webkit-scrollbar { width: 8px; }
 ::-webkit-scrollbar-track { background: transparent; }
@@ -970,6 +991,17 @@ body::after {
 .history-entry .hash {
     color: var(--text-dim);
     opacity: 0.6;
+}
+
+.hash-link {
+    color: var(--accent);
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.hash-link:hover {
+    text-decoration: underline;
+    filter: brightness(1.2);
 }
 
 .history-empty {
