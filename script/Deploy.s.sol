@@ -36,14 +36,6 @@ contract Deploy is Script {
         uint256 diceId = registry.loadCartridge(dice, "Dice Roller");
         console.log("Dice Roller cartridge ID:", diceId);
 
-        // ─── Register Game of Life 64 Cartridge (Optimized) ───
-        string memory root = vm.projectRoot();
-        string memory path = string.concat(root, "/scripts/gameoflife_64_hex.txt");
-        string memory golHex = vm.readFile(path);
-        bytes memory golBytes = vm.parseBytes(string.concat("0x", golHex));
-        uint256 golId = registry.loadCartridge(golBytes, "GoL 64 (Optimized)");
-        console.log("Game of Life cartridge ID:", golId);
-
         // Run test: Hello World to verify VM
         bytes memory helloWorld = bytes(
             "++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]"
@@ -63,7 +55,6 @@ contract Deploy is Script {
         console.log("CartridgeRegistry:", address(registry));
         console.log("Tamagotchi ID:     0");
         console.log("Dice Roller ID:    1");
-        console.log("GoL 64 ID:         2");
         console.log("========================================");
     }
 }

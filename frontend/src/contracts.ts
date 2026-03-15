@@ -6,6 +6,13 @@ export const MONAD_TESTNET = {
   blockExplorerUrls: ['https://testnet.monadexplorer.com'],
 };
 
+export const LOCALHOST_NET = {
+  chainId: '0x7A69', // 31337
+  chainName: 'Localhost',
+  rpcUrls: ['http://localhost:8545'],
+  nativeCurrency: { name: 'MON', symbol: 'MON', decimals: 18 },
+};
+
 // ABI for BrainfuckVM
 export const VM_ABI = [
   'function execute(bytes calldata program, bytes calldata input, uint256 maxSteps) pure returns (bytes memory)',
@@ -30,8 +37,9 @@ export const REGISTRY_ABI = [
   'event GamePlayed(uint256 indexed cartridgeId, address indexed player, bytes output)',
 ];
 
-// Contract addresses (loaded from .env via Vite)
 export const CONTRACTS = {
-  VM: (import.meta.env.VITE_VM_ADDRESS as string) || '0xd73cde0e190fb480bca34c02253156e2072c97dc',
-  REGISTRY: (import.meta.env.VITE_REGISTRY_ADDRESS as string) || '0x0adda254b0fdace9a51cc863be034dc60a6a156b',
+  VM: '0x3b5da0c70795448a82eF683d378DA1a450811D8d',
+  REGISTRY: '0xf781132c072E2D6D80733044bAD33A4b0709BA30',
+  VM_LOCAL: '0x12340F589D9D0cD7cF02cB7390088DC8BC65Ac1C', // Fallback defaults, user can update
+  REGISTRY_LOCAL: '0x607e78C2850c418e2e18fbAe041bb80F10d15862', // Commonly deployed address
 };

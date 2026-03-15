@@ -1,5 +1,16 @@
 import { ethers } from 'ethers';
-import { MONAD_TESTNET, REGISTRY_ABI, CONTRACTS } from './contracts';
+import { MONAD_TESTNET, LOCALHOST_NET, REGISTRY_ABI, CONTRACTS } from './contracts';
+
+export type NetworkType = 'monad' | 'localhost';
+let currentNetworkType: NetworkType = 'monad';
+
+export function setNetworkType(net: NetworkType) {
+  currentNetworkType = net;
+}
+
+export function getNetworkType(): NetworkType {
+  return currentNetworkType;
+}
 
 export type GameId = 'tamagotchi' | 'gameoflife' | 'diceroller';
 
@@ -41,14 +52,16 @@ export async function connectWallet(): Promise<WalletState> {
   // Request accounts
   await provider.send('eth_requestAccounts', []);
 
-  // Try to switch to Monad testnet
+  const targetNetwork = currentNetworkType === 'monad' ? MONAD_TESTNET : LOCALHOST_NET;
+
+  // Try to switch to target network
   try {
     await provider.send('wallet_switchEthereumChain', [
-      { chainId: MONAD_TESTNET.chainId },
+      { chainId: targetNetwork.chainId },
     ]);
   } catch (err: any) {
     if (err.code === 4902) {
-      await provider.send('wallet_addEthereumChain', [MONAD_TESTNET]);
+      await provider.send('wallet_addEthereumChain', [targetNetwork]);
     }
   }
 
@@ -61,10 +74,11 @@ export async function connectWallet(): Promise<WalletState> {
 }
 
 export function getRegistryContract(): ethers.Contract | null {
-  if (!walletState.signer || CONTRACTS.REGISTRY === '0x0000000000000000000000000000000000000000') {
+  const address = currentNetworkType === 'monad' ? CONTRACTS.REGISTRY : CONTRACTS.REGISTRY_LOCAL;
+  if (!walletState.signer || address === '0x0000000000000000000000000000000000000000') {
     return null;
   }
-  return new ethers.Contract(CONTRACTS.REGISTRY, REGISTRY_ABI, walletState.signer);
+  return new ethers.Contract(address, REGISTRY_ABI, walletState.signer);
 }
 
 // Log system

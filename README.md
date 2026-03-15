@@ -1,125 +1,97 @@
-# 🧠 Brainfuck VM — On-Chain Interpreter & L2 Rollup
+# 🧠 Brainfuck VM & BF Console — Monad On-Chain
 
-> **An on-chain Brainfuck interpreter in Solidity + a conceptual L2 rollup using the BF VM as its execution engine.**
+> **A high-performance on-chain Brainfuck interpreter in Solidity + a game registry and console platform.**
 > Built with [Foundry](https://book.getfoundry.sh/) • Targeting [Monad Testnet](https://monad.xyz/)
 
 ## Architecture
 
+The project features a modular architecture where the VM serves as the execution engine for a "Cartridge Registry" system, and conceptually can be used for L2 rollups.
+
 ```
 ┌─────────────────────────────────────────────────────┐
-│                   BrainfuckL2.sol                    │
-│  ┌───────────┐  ┌──────────────┐  ┌──────────────┐  │
-│  │ Sequencer │  │ Fraud Proofs │  │ Finalization │  │
-│  │  Batches  │  │  (Challenge) │  │  (State Root)│  │
-│  └─────┬─────┘  └──────┬───────┘  └──────────────┘  │
-│        │               │                             │
-│        └───────┬───────┘                             │
-│                ▼                                     │
-│        ┌──────────────┐                              │
-│        │ BrainfuckVM  │  ← On-chain execution        │
-│        │  .execute()  │                              │
-│        └──────────────┘                              │
+│                 CartridgeRegistry.sol               │
+│  ┌────────────┐  ┌──────────────┐  ┌──────────────┐ │
+│  │ Games (Cart)│  │ Player State │  │ Persistence  │ │
+│  │ Registration│  │    (Saves)   │  │ (On-chain)   │ │
+│  └─────┬──────┘  └──────┬───────┘  └──────────────┘ │
+│        │                │                           │
+│        └────────┬───────┘                           │
+│                 ▼                                   │
+│        ┌────────────────┐                           │
+│        │  BrainfuckVM   │  ← On-chain execution     │
+│        │   .execute()   │                           │
+│        └────────────────┘                           │
 └─────────────────────────────────────────────────────┘
 ```
 
-## Contracts
+## Core Contracts
 
 | Contract | Description |
 |----------|-------------|
-| `BrainfuckVM.sol` | Full on-chain Brainfuck interpreter (all 8 commands, configurable tape, step limit) |
-| `BrainfuckL2.sol` | Conceptual L2 rollup — batch submission, fraud proofs, state finalization |
+| `BrainfuckVM.sol` | Optimized assembly on-chain interpreter (all 8 commands, 30,000 cell tape). |
+| `CartridgeRegistry.sol` | Game management system. Handles game registration, persistent player saves, and game logic execution. |
+| `BrainfuckL2.sol` | Conceptual L2 rollup — batch submission, fraud proofs, state finalization. |
 
 ## Quick Start
 
 ### Prerequisites
 
 - [Foundry](https://getfoundry.sh/) installed
-- For deployment: MON tokens from [Monad Testnet Faucet](https://faucet.monad.xyz/)
+- MON tokens from [Monad Testnet Faucet](https://faucet.monad.xyz/)
 
-### Build
+### Build & Test
 
 ```bash
+# Build contracts
 forge build
-```
 
-### Test
-
-```bash
-# Run all tests
+# Run all tests (including Snake game tests)
 forge test -vvv
 
 # Run VM tests only
 forge test --match-contract BrainfuckVMTest -vvv
-
-# Run L2 tests only
-forge test --match-contract BrainfuckL2Test -vvv
 ```
 
-### Deploy to Monad Testnet
+### Frontend Development
 
 ```bash
-# 1. Copy env template
-cp .env.example .env
-
-# 2. Edit .env with your private key
-#    PRIVATE_KEY=your_private_key_here
-
-# 3. Load env vars
-source .env
-
-# 4. Deploy
-forge script script/Deploy.s.sol \
-  --rpc-url $MONAD_TESTNET_RPC_URL \
-  --broadcast \
-  --private-key $PRIVATE_KEY
+cd frontend
+npm install
+npm run dev
 ```
+
+## Features & Games
+
+### 🐍 Snake Minimalista
+100% On-chain Snake game logic on a 5x5 grid.
+- **On-chain Validation:** Every move is verified by the VM.
+- **Persistence:** Save your high score directly on Monad.
+- **Interactive UI:** Smooth Canvas 2D rendering with retro d-pad controls.
+
+### 🦠 Game of Life (3D Sphere)
+High-performance cellular automaton stress test.
+- Simulated on-chain via rapid `eth_call` static calls.
+- Visualized in a 3D orbital sphere using Three.js.
+
+### 🐾 Tamagotchi
+Stateful pet simulation where actions (feed, play, sleep) update a persistent on-chain state.
+
+### 🎲 Dice Roller
+Stateless RNG math simulation executed purely via Brainfuck commands.
 
 ## Brainfuck Commands
 
 | Command | Description |
-|---------|-------------|
-| `>` | Move data pointer right |
-| `<` | Move data pointer left |
-| `+` | Increment byte at data pointer |
-| `-` | Decrement byte at data pointer |
-| `.` | Output byte at data pointer |
-| `,` | Read input byte to data pointer |
+|----------|-------------|
+| `>` | Increment the data pointer |
+| `<` | Decrement the data pointer |
+| `+` | Increment the byte at the data pointer |
+| `-` | Decrement the byte at the data pointer |
+| `.` | Output the byte at the data pointer |
+| `,` | Input a byte and store it at the data pointer |
 | `[` | Jump to matching `]` if byte is zero |
 | `]` | Jump back to matching `[` if byte is non-zero |
-
-## Example Programs
-
-### Hello World
-```
-++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++.
-```
-
-### Add Two Numbers
-```
-,>,[<+>-]<.
-```
-
-### Echo Input
-```
-,[.,]
-```
-
-## L2 Flow
-
-1. **Sequencer** submits a batch of BF programs with inputs, expected outputs, and a new state root
-2. During the **challenge period** (100 blocks), anyone can challenge a transaction by re-executing the BF program on-chain
-3. If the on-chain output differs from the committed output → **fraud detected** → batch invalidated
-4. After the challenge period, the batch is **finalized** and the state root is updated
-
-## Monad Testnet
-
-| Property | Value |
-|----------|-------|
-| Chain ID | `10143` |
-| RPC URL | `https://testnet-rpc.monad.xyz` |
-| Explorer | `https://testnet.monadexplorer.com` |
 
 ## License
 
 MIT
-# brainfuckVM

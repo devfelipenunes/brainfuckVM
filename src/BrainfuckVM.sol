@@ -4,25 +4,50 @@ pragma solidity ^0.8.28;
 /// @title BrainfuckVM
 /// @notice On-chain Brainfuck interpreter. Executes BF programs entirely on-chain.
 /// @dev All 8 BF commands are supported: > < + - . , [ ]
+///      Memory tape is configurable, defaults to 30,000 cells (uint8).
+///      A step limit prevents infinite loops from consuming all gas.
 contract BrainfuckVM {
+    // ──────────────────────────────────────────────
+    //  Errors
+    // ──────────────────────────────────────────────
     error PointerOverflow();
     error PointerUnderflow();
     error MaxStepsExceeded();
     error UnmatchedBracket();
 
+    // ──────────────────────────────────────────────
+    //  Events
+    // ──────────────────────────────────────────────
     event ProgramExecuted(
         bytes32 indexed programHash,
         address indexed caller,
         bytes output
     );
 
+    // ──────────────────────────────────────────────
+    //  State
+    // ──────────────────────────────────────────────
     uint256 public immutable tapeSize;
+
+    /// @notice Stores the last execution result per program hash
     mapping(bytes32 => bytes) public lastResult;
 
+    // ──────────────────────────────────────────────
+    //  Constructor
+    // ──────────────────────────────────────────────
     constructor(uint256 _tapeSize) {
         tapeSize = _tapeSize == 0 ? 30_000 : _tapeSize;
     }
 
+    // ──────────────────────────────────────────────
+    //  Public entry point (stores result + emits event)
+    // ──────────────────────────────────────────────
+
+    /// @notice Execute a Brainfuck program on-chain and store the result.
+    /// @param program The BF program as raw bytes (ASCII)
+    /// @param input   The input buffer for the `,` command
+    /// @param maxSteps Maximum number of instruction steps before reverting
+    /// @return output The output produced by the `.` command
     function run(
         bytes calldata program,
         bytes calldata input,
@@ -34,6 +59,15 @@ contract BrainfuckVM {
         emit ProgramExecuted(programHash, msg.sender, output);
     }
 
+    // ──────────────────────────────────────────────
+    //  Pure interpreter (no state changes)
+    // ──────────────────────────────────────────────
+
+    /// @notice Execute a Brainfuck program and return the output (pure computation).
+    /// @param program The BF program as raw bytes (ASCII)
+    /// @param input   The input buffer for the `,` command
+    /// @param maxSteps Maximum number of instruction steps before reverting
+    /// @return output The output produced by the `.` command
     function execute(
         bytes calldata program,
         bytes calldata input,
@@ -45,13 +79,21 @@ contract BrainfuckVM {
         bytes memory jumpTable = _buildJumpTable(program);
         
         assembly {
+            // Memory Layout:
+            // [0x00-0x3f]: Scratch
+            // [0x40]: Free memory pointer
+            // [tape]: Data tape (uint8 array)
+            // [output]: Output bridge (bytes)
+
             let tape := mload(0x40)
-            mstore(0x40, add(tape, 10048))
-            codecopy(tape, codesize(), 10048)
+            
+            // Allocate 30,000 bytes for tape + padding
+            mstore(0x40, add(tape, 30048)) 
+            codecopy(tape, codesize(), 30048) // Zero-init tape
 
             output := mload(0x40)
             mstore(output, 0)
-            mstore(0x40, add(output, 2080))
+            mstore(0x40, add(output, 2080)) // Initial output buffer (2k)
 
             let cursor := 0
             let ptr := tape
@@ -139,7 +181,8 @@ contract BrainfuckVM {
                 }
             }
             
-            if or(lt(ptr, tape), gt(ptr, add(tape, 10000))) {
+            // Bounds check
+            if or(lt(ptr, tape), gt(ptr, add(tape, 30000))) {
                 let ptr_err := mload(0x40)
                 mstore(ptr_err, 0x6e26715800000000000000000000000000000000000000000000000000000000)
                 revert(ptr_err, 4)
@@ -150,6 +193,7 @@ contract BrainfuckVM {
         }
     }
 
+    /// @dev Build a jump table mapping each `[` to its matching `]` and vice versa.
     function _buildJumpTable(
         bytes calldata program
     ) internal pure returns (bytes memory jumpTable) {

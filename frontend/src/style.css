@@ -110,6 +110,25 @@ body::after {
   box-shadow: 0 0 8px var(--accent);
 }
 
+.network-select {
+  background: transparent;
+  color: var(--accent);
+  font-family: var(--font-pixel);
+  font-size: 9px;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  padding-left: 5px;
+}
+
+.network-select option {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 14px;
+}
+
 /* ─── Wallet Bar ─────────────────── */
 .wallet-bar {
   display: flex;
@@ -512,5 +531,208 @@ body::after {
   }
   .stat-label {
     width: 70px;
+  }
+}
+
+/* ─── Snake ──────────────────────── */
+.snake-display {
+  display: flex;
+  gap: 32px;
+  align-items: flex-start;
+}
+
+.snake-grid-wrap {
+  flex: 1;
+  min-width: 0;
+}
+
+#snake-canvas-container {
+  width: 100%;
+  height: 400px;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: #0a0a14;
+  box-shadow: inset 0 0 40px rgba(0,0,0,0.5);
+}
+
+.snake-info-panel {
+  width: 260px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.snake-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 20px;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  font-size: 13px;
+  color: var(--text-dim);
+}
+
+.snake-stats .value {
+  font-family: var(--font-pixel);
+  font-size: 11px;
+  color: var(--accent);
+  margin-left: 8px;
+}
+
+.snake-stats .value.gameover {
+  color: var(--danger);
+  animation: blink 0.8s step-end infinite;
+}
+
+.snake-stats .value.pending {
+  color: var(--warning);
+}
+
+.snake-stats .value.alive {
+  color: var(--accent);
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
+}
+
+/* ── D-Pad ── */
+.snake-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.dpad {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.dpad-mid {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.dpad-center {
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  background: rgba(0,0,0,0.3);
+  border-radius: 12px;
+  border: 1px solid var(--border);
+}
+
+.dpad-btn {
+  width: 56px;
+  height: 56px;
+  font-family: var(--font-pixel);
+  font-size: 10px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all 0.15s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  line-height: 1;
+}
+
+.dpad-btn span {
+  font-size: 14px;
+  color: var(--accent);
+  opacity: 0.5;
+}
+
+.dpad-btn:hover:not(:disabled) {
+  background: rgba(0, 255, 170, 0.15);
+  border-color: var(--accent);
+  color: #fff;
+  transform: scale(1.08);
+  box-shadow: 0 0 15px rgba(0,255,170,0.2);
+}
+
+.dpad-btn:hover:not(:disabled) span {
+  opacity: 1;
+}
+
+.dpad-btn:active:not(:disabled) {
+  transform: scale(0.95);
+  background: rgba(0, 255, 170, 0.3);
+}
+
+.dpad-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* ── Move Log ── */
+.snake-move-log {
+  background: rgba(0, 0, 0, 0.4);
+  padding: 16px;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  max-height: 160px;
+  overflow-y: auto;
+}
+
+.move-log-title {
+  font-family: var(--font-pixel);
+  font-size: 9px;
+  color: var(--text-dim);
+  margin-bottom: 10px;
+  letter-spacing: 1px;
+}
+
+.move-log-entries {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.move-log-entries .empty {
+  font-size: 11px;
+  color: var(--text-dim);
+  opacity: 0.5;
+  font-style: italic;
+}
+
+.move-entry {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  background: rgba(0,255,170,0.08);
+  color: var(--accent);
+  padding: 3px 8px;
+  border-radius: 6px;
+  border: 1px solid rgba(0,255,170,0.1);
+}
+
+/* ── Snake Responsive ── */
+@media (max-width: 768px) {
+  .snake-display {
+    flex-direction: column;
+  }
+  .snake-info-panel {
+    width: 100%;
+  }
+  #snake-canvas-container {
+    height: 320px;
+  }
+  .snake-stats {
+    flex-direction: row;
+    justify-content: space-around;
   }
 }
