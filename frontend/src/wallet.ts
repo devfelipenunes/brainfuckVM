@@ -1,5 +1,5 @@
 import { ethers } from 'ethers';
-import { MONAD_TESTNET, LOCALHOST_NET, REGISTRY_ABI, CONTRACTS } from './contracts';
+import { MONAD_TESTNET, LOCALHOST_NET, REGISTRY_ABI, VM_ABI, CONTRACTS } from './contracts';
 
 export type NetworkType = 'monad' | 'localhost';
 let currentNetworkType: NetworkType = 'monad';
@@ -79,6 +79,14 @@ export function getRegistryContract(): ethers.Contract | null {
     return null;
   }
   return new ethers.Contract(address, REGISTRY_ABI, walletState.signer);
+}
+
+export function getVMContract(): ethers.Contract | null {
+  const address = currentNetworkType === 'monad' ? CONTRACTS.VM : CONTRACTS.VM_LOCAL;
+  if (!walletState.signer || address === '0x0000000000000000000000000000000000000000') {
+    return null;
+  }
+  return new ethers.Contract(address, VM_ABI, walletState.signer);
 }
 
 // Log system

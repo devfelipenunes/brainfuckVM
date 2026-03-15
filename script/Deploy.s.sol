@@ -46,8 +46,8 @@ contract Deploy is Script {
         uint256 jokenpoId = registry.loadCartridge(jokenpo, "Jokenpo");
         console.log("Jokenpo cartridge ID:", jokenpoId);
 
-        // ─── Register Contador Invertido Cartridge (437 bytes) ───
-        bytes memory contador = hex"3e2c3e3e5b2d5d2b3c2c5b3e3e5b2d5d3e5b2d5d3c3c3c5b2d3e3e2b3e2b3c3c3c5d3e3e3e5b2d3c3c3c2b3e3e3e5d3c2d3e3e5b2d5d2b3c3c5b3e3e5b2d5d3c3c5b2d5d5d3e3e5b3c3c3c3c3c2d3e3e3e3e3e5b2d5d5d3c3c5b2d5d3e5b2d5d3c3c3c5b2d3e3e2b3e2b3c3c3c5d3e3e3e5b2d3c3c3c2b3e3e3e5d3c2d2d3e3e5b2d5d2b3c3c5b3e3e5b2d5d3c3c5b2d5d5d3e3e5b3c3c3c3c3c5b2d3e3e3e3e3e3e3e3e3e3e3e3e3e2b3c3c3c3c3c3c3c3c3c3c3c3c3c5d3e3e3e3e3e3e3e3e3e3e3e5b2d5d3e5b2d5d3e3e5b2d5d3c5b2d3c5b2d3e3e2b3e2b3c3c3c5d3e3e3e5b2d3c3c3c2b3e3e3e5d3e5b2d5d2b3c3c5b3c3c5b2d5d3c2b3e3e3e3e3e5b2d5d3c3c5b2d5d5d3e3e5b3c3c3c3c2b3e3e3e3e5b2d5d5d3c3c3c5d3c3c5b2d3c3c3c3c3c3c3c3c3c3c3c2b3e3e3e3e3e3e3e3e3e3e3e5d3e5b3c3c3c3c3c3c3c3c3c3c5b2d5d3e3e3e3e3e3e3e3e3e3e5b2d5d5d3c3c3c3c3c3c3c5b2d5d5d3c3c3c3c5b2d5d2c5d3c2d3e3e3e3e3e5b2d5d2b3c3c3c3c3c5b3e3e3e3e3e5b2d5d3c3c3c3c3c5b2d5d5d3e3e3e3e3e3e3e5b2d5d3c3c3c3c3c5b3e3e3e5b3e3e2b3c3c5b2d5d5d3c3c3c5b2d5d5d3e3e3e3e3e2e";
+        // ─── Register Contador Invertido Cartridge ───
+        bytes memory contador = hex"2c3e2c3c5b2d5b2d5b5b2d5d5d5b2d3e5b2d3e2b3e2b3c3c5d3e3e5b2d5d3e5b2d5d3c3c5b2d3e5b2d3e2b3e2b3c3c5d3e3e5b2d3c3c2b3e3e5d3e5b2d5d2b3c5b3c3c5b2d5d3c2b3e3e3e5b2d5d3c3c3c5b2d5d3e3e3e5d3c5b3c3c2b3e3e5b2d5d5d3c3c3c5d3e3e5b2d5d2b3c3c5b2d3e5b2d5d3c5d3e5b3c3c5b2d3c3c3c3c3c3c3c3c3c3c3c3c2b3e3e3e3e3e3e3e3e3e3e3e3e5d5b2d5d5d3c3c5b2d5d3e5b2d5d3c3c3c3c3c3c3c3c3c3c3c3c3c5b2d5d5d5d5b2d3e2d3c5d5d3e2e";
         uint256 contadorId = registry.loadCartridge(contador, "Contador Invertido");
         console.log("Contador Invertido cartridge ID:", contadorId);
 

@@ -82,9 +82,11 @@ contract CartridgeRegistry {
     ) external returns (uint256 cartridgeId) {
         if (program.length == 0) revert EmptyProgram();
 
+        bytes memory bytecode = VM.compile(program);
+
         cartridgeId = cartridgeCount;
         _cartridges[cartridgeId] = Cartridge({
-            program: program,
+            program: bytecode,
             name: name,
             creator: msg.sender,
             playCount: 0,
@@ -102,9 +104,11 @@ contract CartridgeRegistry {
     ) external returns (uint256 cartridgeId) {
         if (program.length == 0) revert EmptyProgram();
 
+        bytes memory bytecode = VM.compile(program);
+
         cartridgeId = cartridgeCount;
         _cartridges[cartridgeId] = Cartridge({
-            program: program,
+            program: bytecode,
             name: name,
             creator: msg.sender,
             playCount: 0,

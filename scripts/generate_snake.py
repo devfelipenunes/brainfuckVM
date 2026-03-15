@@ -240,6 +240,7 @@ def generate_snake_bf():
     go(16); emit("+")       # quotient++
     go(14); emit("[-]]")
 
+    go(9)                   # <--- FIX: Ensure we are at seed_copy for the loop end
     go(9); emit("]")        # end while
 
     # food_x = remainder(17)
@@ -264,6 +265,7 @@ def generate_snake_bf():
     go(18); emit("+")
     go(14); emit("[-]]")
 
+    go(9)                   # <--- FIX: Ensure we are at q_copy for the loop end
     go(9); emit("]")
 
     clear(3)
@@ -467,6 +469,9 @@ def main():
         ("Multiple direction changes",
          [D, D, S, S, A, A], [0, 0, 0, 0, 0, 0],
          "Zig-zag within bounds"),
+        ("The Failing Sequence",
+         [W, D, S, A], [6, 8, 11, 3],
+         "Sequence that failed on-chain"),
     ]
 
     all_passed = True

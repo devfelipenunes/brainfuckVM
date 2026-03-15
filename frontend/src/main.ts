@@ -1,4 +1,4 @@
-import { getProvider, connectWallet, getRegistryContract, setNetworkType, getNetworkType } from './wallet';
+import { getProvider, connectWallet, getRegistryContract, getVMContract, setNetworkType, getNetworkType } from './wallet';
 import type { NetworkType } from './wallet';
 import { initGoL3D, updateGoL3D, destroyGoL3D } from './GoL3D';
 import { initSnakeCanvas, updateSnakeState, destroySnakeCanvas } from './SnakeRenderer';
@@ -9,9 +9,12 @@ import './style.css';
 
 const GAMES = {
   tamagotchi: { id: 0, title: "Tamagotchi", type: "stateful" },
-  dice:       { id: 3, title: "Dice Roller", type: "stateless" },
-  gameoflife: { id: 4, title: "Game of Life", type: "stresstest" },
-  snake:      { id: 5, title: "Snake", type: "onchain" }
+  dice:       { id: 1, title: "Dice Roller", type: "stateless" },
+  snake:      { id: 2, title: "Snake", type: "onchain" },
+  jokenpo:    { id: 3, title: "Jokenpo", type: "stateless" }, // Rock Paper Scissors
+  contador:   { id: 4, title: "Contador Invertido", type: "stateful" },
+  playground: { id: 99, title: "Playground", type: "playground" },
+  gameoflife: { id: 5, title: "Game of Life", type: "stresstest" }, // If we ever re-add it
 };
 
 // ─── State ────────────────────────
@@ -37,7 +40,7 @@ let snakeFood = { x: 0, y: 0 };
 let snakeTrail: { x: number; y: number }[] = [{ x: 2, y: 2 }];
 let snakeScore = 0;
 let snakeGameOver = false;
-let snakeMoveHistory: string[] = [];
+let snakeMoveHistory: {dir: string, seed: number}[] = [];
 let snakePendingTx = false;
 
 // ─── Render ───────────────────────
@@ -48,7 +51,7 @@ function render() {
   if (!activeGame) {
     app.innerHTML = `
       <div class="header">
-        <h1>🧠 BF Console — ${getNetworkType() === 'monad' ? 'Monad Testnet' : 'Localhost'}</h1>
+        <h1>🧠 Brainfuck Console — ${getNetworkType() === 'monad' ? 'Monad Testnet' : 'Localhost'}</h1>
         <p class="subtitle">100% On-Chain Brainfuck Gaming Platform</p>
         <div class="network-badge">
           <select id="network-select" class="network-select" ${getProvider() ? 'disabled title="Disconnect to switch network"' : ''}>
@@ -66,6 +69,25 @@ function render() {
         <button id="connect-btn" class="btn primary">${getProvider() ? 'Connected' : 'Connect Wallet'}</button>
       </div>
 
+      <div class="playground-section">
+        <div class="section-label-featured">CONSOLE UNIVERSAL</div>
+        <div class="game-card playground-card-featured" data-game="playground">
+          <div class="playground-featured-content">
+            <div class="game-icon">🏗️</div>
+            <div class="featured-text">
+              <h3>Playground</h3>
+              <p>O ambiente definitivo para desenvolvedores Monad. Escreva, depure e execute qualquer código Brainfuck diretamente na blockchain. Sem limites, apenas código puro.</p>
+              <div class="game-meta"><span>ESTADO: UNIVERSAL</span><span>TAXA: SOB DEMANDA</span><span>EXPERIMENTAL</span></div>
+            </div>
+          </div>
+          <!-- <div class="featured-badge">NOVO</div> -->
+        </div>
+      </div>
+
+      <div class="section-divider">
+        <span>CARTUCHOS DISPONÍVEIS</span>
+      </div>
+
       <div class="game-selector">
         <div class="game-card" data-game="tamagotchi">
           <div class="game-icon">🐾</div>
@@ -78,21 +100,35 @@ function render() {
           <div class="game-icon">🎲</div>
           <h3>Dice Roller</h3>
           <p>Stateless RNG math simulation executed purely via Brainfuck commands.</p>
-          <div class="game-meta"><span>ID: 3</span><span>Cost: ~8M Gas</span></div>
-        </div>
-        
-        <div class="game-card" data-game="gameoflife">
-          <div class="game-icon">🦠</div>
-          <h3>Game of Life (3D)</h3>
-          <p>Rule 102 Cellular Automaton. Simulates 1000 cells via rapid staticCalls (TPS stress test).</p>
-          <div class="game-meta"><span>ID: 4</span><span>Cost: ~2.1M Gas (Pure Exec)</span></div>
+          <div class="game-meta"><span>ID: 1</span><span>Cost: ~8M Gas</span></div>
         </div>
         
         <div class="game-card" data-game="snake">
           <div class="game-icon">🐍</div>
           <h3>Snake</h3>
-          <p>Classic snake on a 5×5 grid. Each move validated on-chain via BrainfuckVM. Don't hit the walls!</p>
-          <div class="game-meta"><span>ID: 5</span><span>Cost: ~5M Gas</span></div>
+          <p>Classic snake on a 5×5 grid. Each move validated on-chain via BrainfuckVM.</p>
+          <div class="game-meta"><span>ID: 2</span><span>Cost: ~5M Gas</span></div>
+        </div>
+
+        <div class="game-card" data-game="jokenpo">
+          <div class="game-icon">✂️</div>
+          <h3>Jokenpo</h3>
+          <p>Rock Paper Scissors contra a máquina. Cada jogada é uma transação on-chain real.</p>
+          <div class="game-meta"><span>ID: 3</span><span>Custo: ~2M Gas</span></div>
+        </div>
+
+        <div class="game-card" data-game="contador">
+          <div class="game-icon">⏲️</div>
+          <h3>Inverted Counter</h3>
+          <p>A weird counter that goes up/down. Uses persistent state.</p>
+          <div class="game-meta"><span>ID: 4</span><span>Cost: ~3M Gas</span></div>
+        </div>
+        
+        <div class="game-card" data-game="gameoflife">
+          <div class="game-icon">🦠</div>
+          <h3>Game of Life (3D)</h3>
+          <p>Rule 102 Cellular Automaton. TPS stress test via staticCalls.</p>
+          <div class="game-meta"><span>ID: 5(?)</span><span>Legacy/Stress</span></div>
         </div>
       </div>
     `;
@@ -120,6 +156,9 @@ function render() {
         if (activeGame === 'dice') setupDice();
         if (activeGame === 'gameoflife') setupGameOfLife();
         if (activeGame === 'snake') setupSnake();
+        if (activeGame === 'jokenpo') setupJokenpo();
+        if (activeGame === 'contador') setupContador();
+        if (activeGame === 'playground') setupPlayground();
       });
     });
   } else {
@@ -265,11 +304,6 @@ function render() {
               
               <button id="snake-reset" class="btn danger" style="margin-top: 16px; width: 100%;">RESET GAME</button>
             </div>
-            
-            <div class="snake-move-log">
-              <div class="move-log-title">MOVE LOG</div>
-              <div class="move-log-entries">${snakeMoveHistory.length === 0 ? '<span class="empty">Press W/A/S/D to move</span>' : snakeMoveHistory.map((m, i) => `<span class="move-entry">${i + 1}.${m.toUpperCase()}</span>`).join('')}</div>
-            </div>
           </div>
         </div>
       `;
@@ -280,7 +314,6 @@ function render() {
         updateSnakeState(snakeHead, snakeFood, snakeTrail, snakeGameOver);
       }
       
-      // D-pad button events
       document.querySelectorAll('.dpad-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           const dir = (btn as HTMLElement).dataset.dir;
@@ -290,6 +323,93 @@ function render() {
       
       document.getElementById('snake-reset')?.addEventListener('click', snakeReset);
       setupSnakeKeyboard();
+    }
+
+    if (activeGame === 'jokenpo') {
+      gc.innerHTML = `
+        <div class="jokenpo-display">
+          <div class="jokenpo-result" id="jokenpo-res">ESCOLHA SUA JOGADA</div>
+          <div class="jokenpo-reason" id="jokenpo-reason"></div>
+          
+          <div class="jokenpo-arena">
+            <div class="jokenpo-side">
+              <div class="jokenpo-label">VOCÊ</div>
+              <div class="jokenpo-move-icon" id="my-move">?</div>
+            </div>
+            
+            <div class="jokenpo-vs">VS</div>
+            
+            <div class="jokenpo-side">
+              <div class="jokenpo-label">OPONENTE</div>
+              <div class="jokenpo-move-icon" id="opponent-move">?</div>
+            </div>
+          </div>
+
+          <div class="jokenpo-choices">
+            <button class="choice-btn" data-move="0"><span class="icon">✊</span>Pedra</button>
+            <button class="choice-btn" data-move="1"><span class="icon">📄</span>Papel</button>
+            <button class="choice-btn" data-move="2"><span class="icon">✂️</span>Tesoura</button>
+          </div>
+        </div>
+      `;
+      document.querySelectorAll('.choice-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const move = (btn as HTMLElement).dataset.move;
+          if (move) playJokenpo(parseInt(move));
+        });
+      });
+    }
+
+    if (activeGame === 'contador') {
+      gc.innerHTML = `
+        <div class="contador-display">
+          <div class="contador-title">MONAD ON-CHAIN VIRTUAL CONSOLE</div>
+          <div class="contador-value" id="contador-val">?</div>
+          <div class="contador-status" id="contador-status">READY FOR OPS</div>
+          
+          <div class="action-buttons">
+            <button id="cont-init" class="action-btn">REINICIAR (N=15)</button>
+            <div class="btn-group">
+              <button id="cont-sub" class="action-btn primary" data-action="1">SUBTRAIR (-1)</button>
+              <button id="cont-div" class="action-btn primary" data-action="2">DIVIDIR (/2)</button>
+            </div>
+          </div>
+
+          <div class="contador-history">
+            <div class="history-title">HISTÓRICO DE TRANSAÇÕES</div>
+            <div id="contador-tx-list" class="history-list">
+              <div class="history-empty">Nenhuma transação nesta sessão.</div>
+            </div>
+          </div>
+        </div>
+      `;
+      setupContadorEvents();
+    }
+
+    if (activeGame === 'playground') {
+      gc.innerHTML = `
+        <div class="playground-display">
+          <div class="playground-editor-section">
+            <div class="section-label">CÓDIGO BRAINFUCK (.bf)</div>
+            <textarea id="bf-code" class="bf-editor" placeholder="Digite seu código Brainfuck aqui... Ex: ++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++."></textarea>
+          </div>
+
+          <div class="playground-editor-section">
+            <div class="section-label">INPUT DO PROGRAMA (Opcional)</div>
+            <input type="text" id="bf-input" class="bf-input-area" placeholder="Ex: ABC">
+          </div>
+
+          <div class="playground-controls">
+            <button id="bf-run" class="btn primary">EXECUTAR NA BLOCKCHAIN</button>
+          </div>
+
+          <div class="playground-result-section">
+            <div class="section-label">RESULTADO DA EXECUÇÃO</div>
+            <div id="bf-result" class="bf-result-display empty">O resultado aparecerá aqui após a confirmação da transação...</div>
+          </div>
+        </div>
+      `;
+      setupPlaygroundEvents();
     }
     
     // Auto-scroll logs
@@ -302,6 +422,15 @@ function addLog(msg: string, type: 'info'|'success'|'error' = 'info') {
   const time = new Date().toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
   txLogs.push({ msg, type, time });
   if (txLogs.length > 20) txLogs.shift();
+  
+  const logDiv = document.querySelector('.console-log');
+  if (logDiv) {
+    const entry = document.createElement('div');
+    entry.className = `log-entry ${type}`;
+    entry.innerHTML = `<span class="timestamp">[${time}]</span>${msg}`;
+    logDiv.appendChild(entry);
+    logDiv.scrollTop = logDiv.scrollHeight;
+  }
 }
 
 // ─── Tamagotchi On-Chain ──────────
@@ -336,7 +465,7 @@ function setupTamagotchiEvents() {
     if (!reg) return;
     try {
       addLog('Tx: Initializing cartidge state (ID 0)...', 'info');
-      const tx = await reg.initState(GAMES.tamagotchi.id);
+      const tx = await reg["initState(uint256)"](GAMES.tamagotchi.id);
       addLog(`Mined! Hash: ${tx.hash.substring(0, 10)}...`, 'success');
       await tx.wait();
       addLog('State initialized on-chain!', 'success');
@@ -524,7 +653,8 @@ async function snakeMove(dir: string) {
   if (dir === 'a') snakeHead.x -= 1;
   if (dir === 'd') snakeHead.x += 1;
 
-  snakeMoveHistory.push(dir);
+  const moveSeed = Math.floor(Math.random() * 25);
+  snakeMoveHistory.push({dir, seed: moveSeed});
   snakeTrail.push({ ...snakeHead });
   if (snakeTrail.length > snakeScore + 2) snakeTrail.shift();
 
@@ -544,21 +674,21 @@ async function snakeMove(dir: string) {
   try {
     // Build input: all accumulated moves interleaved with seeds
     const moves = snakeMoveHistory.map(m => {
-      if (m === 'w') return 119;
-      if (m === 'a') return 97;
-      if (m === 's') return 115;
+      if (m.dir === 'w') return 119;
+      if (m.dir === 'a') return 97;
+      if (m.dir === 's') return 115;
       return 100; // d
     });
     const inputBytes = new Uint8Array(moves.length * 2);
     for (let i = 0; i < moves.length; i++) {
       inputBytes[i * 2] = moves[i];
-      inputBytes[i * 2 + 1] = Math.floor(Math.random() * 25); // seed for food placement
+      inputBytes[i * 2 + 1] = snakeMoveHistory[i].seed;
     }
     const inputHex = ethers.hexlify(inputBytes);
 
     addLog(`Tx: Validating move #${snakeMoveHistory.length} (${dir.toUpperCase()}) on-chain...`, 'info');
 
-    const resultHex = await reg.play.staticCall(GAMES.snake.id, inputHex, 5_000_000);
+    const resultHex = await reg.play.staticCall(GAMES.snake.id, inputHex, 10_000_000);
     const output = ethers.getBytes(resultHex);
 
     if (output.length >= 2) {
@@ -611,6 +741,213 @@ async function snakeMove(dir: string) {
   }
 }
 
+// ─── Jokenpo On-Chain ────────────────
+
+function setupJokenpo() {
+  addLog('✂️ Jokenpo ready!', 'info');
+}
+
+async function playJokenpo(playerMove: number) {
+  const reg = getRegistryContract();
+  if (!reg) return addLog('Por favor, conecte a carteira.', 'error');
+
+  const btnNodes = document.querySelectorAll('.choice-btn');
+  btnNodes.forEach(b => (b as HTMLButtonElement).disabled = true);
+
+  const myMoveEl = document.getElementById('my-move');
+  const opponentMoveEl = document.getElementById('opponent-move');
+  const resultEl = document.getElementById('jokenpo-res');
+  const reasonEl = document.getElementById('jokenpo-reason');
+
+  const moves = [
+    { name: "Pedra", icon: "✊" },
+    { name: "Papel", icon: "📄" },
+    { name: "Tesoura", icon: "✂️" }
+  ];
+
+  if (myMoveEl) {
+    myMoveEl.innerHTML = moves[playerMove].icon;
+    myMoveEl.classList.remove('winner');
+  }
+  if (opponentMoveEl) {
+    opponentMoveEl.innerHTML = "❓";
+    opponentMoveEl.classList.remove('winner');
+  }
+  if (resultEl) resultEl.innerHTML = "JO-KEN-PO...";
+  if (reasonEl) reasonEl.innerHTML = "Aguardando confirmação na MetaMask...";
+
+  try {
+    const seed = Math.floor(Math.random() * 255);
+    const input = ethers.hexlify(new Uint8Array([playerMove, seed]));
+    
+    addLog(`[Jokenpo] Iniciando transação: ${moves[playerMove].name} vs ?`, 'info');
+    
+    // Send real transaction
+    const tx = await reg.play(GAMES.jokenpo.id, input, 200_000);
+    addLog(`Transação enviada! Hash: ${tx.hash.substring(0, 18)}...`, 'success');
+    addLog(`Minerando na Monad Testnet...`, 'info');
+    
+    const receipt = await tx.wait();
+    addLog(`Confirmado! Bloco: ${receipt.blockNumber} | Gas: ${receipt.gasUsed.toString()}`, 'success');
+
+    // To show result, we can either parse logs or do a staticCall (since the state changed, or just to get the value)
+    // Here we parse the GamePlayed event
+    let result = 0;
+    const opponentMove = seed % 3;
+
+    for (const log of receipt.logs) {
+      try {
+        const parsed = reg.interface.parseLog(log);
+        if (parsed?.name === 'GamePlayed') {
+          result = ethers.getBytes(parsed.args.output)[0];
+          break;
+        }
+      } catch (e) {}
+    }
+
+    if (opponentMoveEl) opponentMoveEl.innerHTML = moves[opponentMove].icon;
+
+    if (resultEl) {
+      if (result === 0) {
+        resultEl.innerHTML = "🤝 EMPATE";
+        if (reasonEl) reasonEl.innerHTML = `${moves[playerMove].name} empata com ${moves[opponentMove].name}`;
+        addLog(`Resultado: EMPATE! Ambos jogaram ${moves[playerMove].name}.`, 'info');
+      } else if (result === 1) {
+        resultEl.innerHTML = "🎉 VOCÊ VENCEU!";
+        if (myMoveEl) myMoveEl.classList.add('winner');
+        if (reasonEl) reasonEl.innerHTML = `${moves[playerMove].name} vence ${moves[opponentMove].name}`;
+        addLog(`Resultado: VITÓRIA! ${moves[playerMove].name} vence ${moves[opponentMove].name}.`, 'success');
+      } else {
+        resultEl.innerHTML = "💀 VOCÊ PERDEU";
+        if (opponentMoveEl) opponentMoveEl.classList.add('winner');
+        if (reasonEl) reasonEl.innerHTML = `${moves[opponentMove].name} vence ${moves[playerMove].name}`;
+        addLog(`Resultado: DERROTA! ${moves[opponentMove].name} vence ${moves[playerMove].name}.`, 'error');
+      }
+    }
+  } catch (e: any) { 
+    addLog('Falha na transação: ' + (e.reason || e.message), 'error'); 
+    if (resultEl) resultEl.innerHTML = "CANCELADO";
+    if (reasonEl) reasonEl.innerHTML = "Transação rejeitada ou falhou.";
+  } finally {
+    btnNodes.forEach(b => (b as HTMLButtonElement).disabled = false);
+  }
+}
+
+// ─── Contador On-Chain ───────────────
+
+async function setupContador() {
+  const reg = getRegistryContract();
+  if (!reg) return;
+  try {
+    const signer = await (await getProvider())?.getSigner();
+    if (!signer) return;
+    
+    // addLog('Fetching counter state from Monad...', 'info');
+    const state = await reg.getPlayerState(GAMES.contador.id, signer.address);
+    const bytes = ethers.getBytes(state);
+    
+    const val = bytes.length > 0 ? bytes[0] : 0;
+    const display = document.getElementById('contador-val');
+    if (display) display.innerHTML = val.toString();
+  } catch (e) { 
+    console.error(e);
+    addLog('Failed to fetch state: ' + (e as Error).message, 'error');
+  }
+}
+
+function setupContadorEvents() {
+  const statusEl = document.getElementById('contador-status');
+  const display = document.getElementById('contador-val');
+
+  const setPending = (pending: boolean) => {
+    const buttons = document.querySelectorAll('.contador-display .action-btn');
+    buttons.forEach(b => (b as HTMLButtonElement).disabled = pending);
+    if (statusEl) {
+      statusEl.innerHTML = pending ? "TRANSACTION PENDING..." : "READY FOR OPS";
+      statusEl.className = `contador-status ${pending ? 'pending' : ''}`;
+    }
+    if (pending && display) {
+      display.classList.add('loading');
+    } else if (display) {
+      display.classList.remove('loading');
+    }
+  };
+
+  const addTxToHistory = (hash: string, action: string, status: 'pending'|'success'|'error') => {
+    const list = document.getElementById('contador-tx-list');
+    if (!list) return;
+    
+    if (list.querySelector('.history-empty')) list.innerHTML = '';
+    
+    const entry = document.createElement('div');
+    entry.className = `history-entry ${status}`;
+    entry.innerHTML = `
+      <span class="action">${action}</span>
+      <span class="hash">${hash.substring(0, 10)}...</span>
+      <span class="status-icon">${status === 'pending' ? '⏳' : status === 'success' ? '✅' : '❌'}</span>
+    `;
+    list.prepend(entry);
+    if (list.childNodes.length > 5) list.lastChild?.remove();
+  };
+
+  const doAction = async (action: number) => {
+    const reg = getRegistryContract();
+    if (!reg) return addLog('Please connect wallet.', 'error');
+    
+    const actionName = action === 1 ? "SUBTRAIR (-1)" : "DIVIDIR (/2)";
+    setPending(true);
+    
+    try {
+      addLog(`[Contador] Iniciando transação: ${actionName}`, 'info');
+      const input = ethers.hexlify(new Uint8Array([action]));
+      
+      const tx = await reg.playWithState(GAMES.contador.id, input, 150_000);
+      addLog(`Transação enviada! Hash: ${tx.hash.substring(0, 18)}...`, 'success');
+      addTxToHistory(tx.hash, actionName, 'pending');
+      
+      const receipt = await tx.wait();
+      if (receipt) {
+        addLog(`Confirmado! Bloco: ${receipt.blockNumber} | Gas: ${receipt.gasUsed.toString()}`, 'success');
+        addTxToHistory(tx.hash, actionName, 'success');
+      }
+      
+      await setupContador();
+    } catch (e: any) { 
+      const msg = e.reason || e.message;
+      addLog('Falha na transação: ' + msg, 'error'); 
+      addTxToHistory('0x...', actionName, 'error');
+    } finally {
+      setPending(false);
+    }
+  };
+
+  document.getElementById('cont-init')?.addEventListener('click', async () => {
+    const reg = getRegistryContract();
+    if (!reg) return addLog('Please connect wallet.', 'error');
+    
+    setPending(true);
+    try {
+      addLog('[Contador] Reiniciando estado para N=15...', 'info');
+      const tx = await reg["initState(uint256,bytes)"](GAMES.contador.id, "0x0f"); // 15
+      addLog(`Transação de Reset enviada!`, 'success');
+      addTxToHistory(tx.hash, "RESET (15)", 'pending');
+      
+      await tx.wait();
+      addLog(`Estado reiniciado com sucesso.`, 'success');
+      addTxToHistory(tx.hash, "RESET (15)", 'success');
+      
+      await setupContador();
+    } catch (e: any) { 
+      addLog('Erro no reset: ' + (e.reason || e.message), 'error'); 
+    } finally {
+      setPending(false);
+    }
+  });
+
+  document.getElementById('cont-sub')?.addEventListener('click', () => doAction(1));
+  document.getElementById('cont-div')?.addEventListener('click', () => doAction(2));
+}
+
 // ─── Snake Keyboard ──────────────────
 
 function snakeKeyHandler(e: KeyboardEvent) {
@@ -627,6 +964,75 @@ function setupSnakeKeyboard() {
 
 function removeSnakeKeyboard() {
   window.removeEventListener('keydown', snakeKeyHandler);
+}
+
+// ─── Brainfuck Playground ──────────
+
+async function setupPlayground() {
+  addLog('Pronto para compilar e executar código Brainfuck na Blockchain!', 'info');
+}
+
+function setupPlaygroundEvents() {
+  const runBtn = document.getElementById('bf-run');
+  const codeArea = document.getElementById('bf-code') as HTMLTextAreaElement;
+  const inputArea = document.getElementById('bf-input') as HTMLInputElement;
+  const resultDisplay = document.getElementById('bf-result');
+
+  runBtn?.addEventListener('click', async () => {
+    const code = codeArea.value.trim();
+    if (!code) return addLog('Por favor, insira o código Brainfuck.', 'error');
+
+    const vm = getVMContract();
+    if (!vm) return addLog('Por favor, conecte a carteira.', 'error');
+
+    const inputStr = inputArea.value;
+    const inputBytes = new TextEncoder().encode(inputStr);
+    const codeBytes = new TextEncoder().encode(code);
+
+    try {
+      addLog('[Playground] Iniciando execução na Monad...', 'info');
+      if (runBtn) (runBtn as HTMLButtonElement).disabled = true;
+      if (resultDisplay) {
+        resultDisplay.innerHTML = '⏳ Executando transação...';
+        resultDisplay.classList.remove('empty');
+      }
+
+      // We use run() which is state-changing (emits events)
+      // BrainfuckVM.run(bytes program, bytes input, uint256 maxSteps)
+      const tx = await vm.run(ethers.hexlify(codeBytes), ethers.hexlify(inputBytes), 1_000_000);
+      addLog(`Transação enviada! Hash: ${tx.hash.substring(0, 18)}...`, 'success');
+      
+      const receipt = await tx.wait();
+      addLog(`Execução concluída! Gas: ${receipt.gasUsed.toString()}`, 'success');
+
+      // Parse output from ProgramExecuted event
+      let outputHex = '0x';
+      for (const log of receipt.logs) {
+        try {
+          const parsed = vm.interface.parseLog(log);
+          if (parsed?.name === 'ProgramExecuted') {
+            outputHex = parsed.args.output;
+            break;
+          }
+        } catch (e) {}
+      }
+
+      const outputBytes = ethers.getBytes(outputHex);
+      const outputText = new TextDecoder().decode(outputBytes);
+      
+      if (resultDisplay) {
+        resultDisplay.innerHTML = outputText || '(Nenhuma saída gerada)';
+      }
+      addLog(`Resultado: ${outputText || 'vazio'}`, 'success');
+
+    } catch (e: any) {
+      const msg = e.reason || e.message;
+      addLog('Falha na execução: ' + msg, 'error');
+      if (resultDisplay) resultDisplay.innerHTML = 'Erro: ' + msg;
+    } finally {
+      if (runBtn) (runBtn as HTMLButtonElement).disabled = false;
+    }
+  });
 }
 
 // ─── Initialization ────────────────

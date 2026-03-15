@@ -1,0 +1,99 @@
+============================================================
+SNAKE MINIMALISTA — BRAINFUCK CARTRIDGE
+============================================================
+
+Program length: 3085 bytes
+✓ Brackets matched correctly
+
+============================================================
+TEST VECTORS
+============================================================
+
+  PASS ✓ Move right (safe)
+         Simple right move from center
+         Moves=['d']
+         Python: game_over=0, score=0
+         BF:     game_over=0, score=0
+
+  PASS ✓ Move left (safe)
+         Simple left move from center
+         Moves=['a']
+         Python: game_over=0, score=0
+         BF:     game_over=0, score=0
+
+  PASS ✓ Move up (safe)
+         Simple up move from center
+         Moves=['w']
+         Python: game_over=0, score=0
+         BF:     game_over=0, score=0
+
+  PASS ✓ Move down (safe)
+         Simple down move from center
+         Moves=['s']
+         Python: game_over=0, score=0
+         BF:     game_over=0, score=0
+
+  PASS ✓ Hit right wall
+         Start at x=2, move right 3 times → x=5 → game over
+         Moves=['d', 'd', 'd']
+         Python: game_over=1, score=0
+         BF:     game_over=1, score=0
+
+  PASS ✓ Hit left wall
+         Start at x=2, move left 3 times → x=-1 → game over
+         Moves=['a', 'a', 'a']
+         Python: game_over=1, score=0
+         BF:     game_over=1, score=0
+
+  PASS ✓ Hit bottom wall
+         Start at y=2, move down 3 times → y=5 → game over
+         Moves=['s', 's', 's']
+         Python: game_over=1, score=0
+         BF:     game_over=1, score=0
+
+  PASS ✓ Hit top wall
+         Start at y=2, move up 3 times → y=-1 → game over
+         Moves=['w', 'w', 'w']
+         Python: game_over=1, score=0
+         BF:     game_over=1, score=0
+
+  PASS ✓ Collect food at (0,0)
+         Move to (0,0) from (2,2) → eat food → score=1
+         Moves=['a', 'a', 'w', 'w']
+         Python: game_over=0, score=1
+         BF:     game_over=0, score=1
+
+  PASS ✓ Collect food then survive
+         Eat food at (0,0), then move right → alive, score=1
+         Moves=['a', 'a', 'w', 'w', 'd']
+         Python: game_over=0, score=1
+         BF:     game_over=0, score=1
+
+  PASS ✓ No food, survive several moves
+         Move in a square from center, no food eaten
+         Moves=['d', 's', 'a', 'w']
+         Python: game_over=0, score=0
+         BF:     game_over=0, score=0
+
+  PASS ✓ Multiple direction changes
+         Zig-zag within bounds
+         Moves=['d', 'd', 's', 's', 'a', 'a']
+         Python: game_over=0, score=0
+         BF:     game_over=0, score=0
+
+  PASS ✓ The Failing Sequence
+         Sequence that failed on-chain
+         Moves=['w', 'd', 's', 'a']
+         Python: game_over=0, score=0
+         BF:     game_over=0, score=0
+
+============================================================
+✓ ALL TESTS PASSED
+============================================================
+
+Files written:
+  snake.bf       (3085 bytes)
+  snake_hex.txt  (3085 bytes)
+
+Solidity hex:
+hex"2b2b3e2b2b3e3e3e3e3e2c5b3e2c3e3e5b2d5d3e5b2d5d3c3c3c3c5b2d3e3e3e2b3e2b3c3c3c3c5d3e3e3e3e5b2d3c3c3c3c2b3e3e3e3e5d3c2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d3e3e5b2d5d2b3c3c5b3e3e2d3c3c5b2d5d5d3e3e5b3c3c3c3c3c3c3c3c3c3c2d3e3e3e3e3e3e3e3e3e3e5b2d5d5d3c3c5b2d5d3e5b2d5d3c3c3c3c5b2d3e3e3e2b3e2b3c3c3c3c5d3e3e3e3e5b2d3c3c3c3c2b3e3e3e3e5d3c2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d3e3e5b2d5d2b3c3c5b3e3e2d3c3c5b2d5d5d3e3e5b3c3c3c3c3c3c3c3c3c3c2b3e3e3e3e3e3e3e3e3e3e5b2d5d5d3c3c5b2d5d3e5b2d5d3c3c3c3c5b2d3e3e3e2b3e2b3c3c3c3c5d3e3e3e3e5b2d3c3c3c3c2b3e3e3e3e5d3c2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d3e3e5b2d5d2b3c3c5b3e3e2d3c3c5b2d5d5d3e3e5b3c3c3c3c3c3c3c3c3c3c3c2d3e3e3e3e3e3e3e3e3e3e3e5b2d5d5d3c3c5b2d5d3e5b2d5d3c3c3c3c5b2d3e3e3e2b3e2b3c3c3c3c5d3e3e3e3e5b2d3c3c3c3c2b3e3e3e3e5d3c2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d3e3e5b2d5d2b3c3c5b3e3e2d3c3c5b2d5d5d3e3e5b3c3c3c3c3c3c3c3c3c3c3c2b3e3e3e3e3e3e3e3e3e3e3e5b2d5d5d3c3c5b2d5d3e5b2d5d3c3c3c3c3c3c3c3c3c3c5b2d3e3e3e3e3e3e3e3e3e2b3e2b3c3c3c3c3c3c3c3c3c3c5d3e3e3e3e3e3e3e3e3e3e5b2d3c3c3c3c3c3c3c3c3c3c2b3e3e3e3e3e3e3e3e3e3e5d3e5b2d5d3e5b2d5d3e5b2d5d3c3c3c3c5b2d3e3e3e2b3e2b3c3c3c3c5d3e3e3e3e5b2d3c3c3c3c2b3e3e3e3e5d3e5b2d5d2b3c3c5b3e3e2d3c3c5b2d5d5d3e3e5b3c3c3c5b2d5d2b3e3e3e5b2d5d5d3c3c3c3c3c2d3e3e3e5b2d5d3e5b2d5d3c3c3c3c5b2d3e3e3e2b3e2b3c3c3c3c5d3e3e3e3e5b2d3c3c3c3c2b3e3e3e3e5d3e5b2d5d2b3c3c5b3e3e2d3c3c5b2d5d5d3e3e5b3c3c3c5b2d5d2b3e3e3e5b2d5d5d3c3c3c3c3c2d3e3e3e5b2d5d3e5b2d5d3c3c3c3c5b2d3e3e3e2b3e2b3c3c3c3c5d3e3e3e3e5b2d3c3c3c3c2b3e3e3e3e5d3e5b2d5d2b3c3c5b3e3e2d3c3c5b2d5d5d3e3e5b3c3c3c5b2d5d2b3e3e3e5b2d5d5d3c3c3c3c3c2d3e3e3e5b2d5d3e5b2d5d3c3c3c3c5b2d3e3e3e2b3e2b3c3c3c3c5d3e3e3e3e5b2d3c3c3c3c2b3e3e3e3e5d3e5b2d5d2b3c3c5b3e3e2d3c3c5b2d5d5d3e3e5b3c3c3c5b2d5d2b3e3e3e5b2d5d5d3c3c3c3c3c2d3e3e3e5b2d5d3e5b2d5d3c3c3c3c5b2d3e3e3e2b3e2b3c3c3c3c5d3e3e3e3e5b2d3c3c3c3c2b3e3e3e3e5d3e5b2d5d2b3c3c5b3e3e2d3c3c5b2d5d5d3e3e5b3c3c3c5b2d5d2b3e3e3e5b2d5d5d3c3c3c3c3c2d3e3e3e5b2d5d3e5b2d5d3c3c5b2d3e2b3e2b3c3c5d3e3e5b2d3c3c2b3e3e5d3e5b2d5d2b3c3c5b3e3e2d3c3c5b2d5d5d3e3e5b3c3c3c3c3c3c3c3c3c5b2d5d2b3e3e3e3e3e3e3e3e3e5b2d5d5d3c3c3c3c3c5b2d5d3e5b2d5d3c3c3c3c3c3c3c3c3c5b2d3e3e3e3e3e3e3e3e2b3e2b3c3c3c3c3c3c3c3c3c5d3e3e3e3e3e3e3e3e3e5b2d3c3c3c3c3c3c3c3c3c2b3e3e3e3e3e3e3e3e3e5d3e5b2d5d3e5b2d5d3e5b2d5d3c3c3c3c5b2d3e3e3e2b3e2b3c3c3c3c5d3e3e3e3e5b2d3c3c3c3c2b3e3e3e3e5d3e5b2d5d2b3c3c5b3e3e2d3c3c5b2d5d5d3e3e5b3c3c3c5b2d5d2b3e3e3e5b2d5d5d3c3c3c3c3c2d3e3e3e5b2d5d3e5b2d5d3c3c3c3c5b2d3e3e3e2b3e2b3c3c3c3c5d3e3e3e3e5b2d3c3c3c3c2b3e3e3e3e5d3e5b2d5d2b3c3c5b3e3e2d3c3c5b2d5d5d3e3e5b3c3c3c5b2d5d2b3e3e3e5b2d5d5d3c3c3c3c3c2d3e3e3e5b2d5d3e5b2d5d3c3c3c3c5b2d3e3e3e2b3e2b3c3c3c3c5d3e3e3e3e5b2d3c3c3c3c2b3e3e3e3e5d3e5b2d5d2b3c3c5b3e3e2d3c3c5b2d5d5d3e3e5b3c3c3c5b2d5d2b3e3e3e5b2d5d5d3c3c3c3c3c2d3e3e3e5b2d5d3e5b2d5d3c3c3c3c5b2d3e3e3e2b3e2b3c3c3c3c5d3e3e3e3e5b2d3c3c3c3c2b3e3e3e3e5d3e5b2d5d2b3c3c5b3e3e2d3c3c5b2d5d5d3e3e5b3c3c3c5b2d5d2b3e3e3e5b2d5d5d3c3c3c3c3c2d3e3e3e5b2d5d3e5b2d5d3c3c3c3c5b2d3e3e3e2b3e2b3c3c3c3c5d3e3e3e3e5b2d3c3c3c3c2b3e3e3e3e5d3e5b2d5d2b3c3c5b3e3e2d3c3c5b2d5d5d3e3e5b3c3c3c5b2d5d2b3e3e3e5b2d5d5d3c3c3c3c3c2d3e3e3e5b2d5d3e5b2d5d3c3c5b2d3e2b3e2b3c3c5d3e3e5b2d3c3c2b3e3e5d3e5b2d5d2b3c3c5b3e3e2d3c3c5b2d5d5d3e3e5b3c3c3c3c3c3c3c3c3c5b2d5d2b3e3e3e3e3e3e3e3e3e5b2d5d5d3c3c5b2d5d3e5b2d5d3c3c3c3c3c3c3c3c5b2d3e3e3e3e3e3e3e2b3e2b3c3c3c3c3c3c3c3c5d3e3e3e3e3e3e3e3e5b2d3c3c3c3c3c3c3c3c2b3e3e3e3e3e3e3e3e5d3c5b3c3c3c3c3c3c5b2d5d3e3e3e3e3e3e5b2d5d5d3c3c3c5b2d5d3e5b2d5d3c3c3c3c3c3c3c3c3c3c5b2d3e3e3e3e3e3e3e3e3e2b3e2b3c3c3c3c3c3c3c3c3c3c5d3e3e3e3e3e3e3e3e3e3e5b2d3c3c3c3c3c3c3c3c3c3c2b3e3e3e3e3e3e3e3e3e3e5d3e3e5b2d5d3e5b2d5d3c3c3c3c3c3c3c3c3c3c3c5b2d3e3e3e3e3e3e3e3e3e3e2b3e2b3c3c3c3c3c3c3c3c3c3c3c5d3e3e3e3e3e3e3e3e3e3e3e5b2d3c3c3c3c3c3c3c3c3c3c3c2b3e3e3e3e3e3e3e3e3e3e3e5d3c5b2d3c3c3c2d3e3e3e5d3c5b2d5d2b3c3c5b3e3e2d3c3c5b2d5d5d5b2d5d3e5b2d5d3c3c3c3c3c3c3c3c3c5b2d3e3e3e3e3e3e3e3e2b3e2b3c3c3c3c3c3c3c3c3c5d3e3e3e3e3e3e3e3e3e5b2d3c3c3c3c3c3c3c3c3c2b3e3e3e3e3e3e3e3e3e5d3e3e5b2d5d3e5b2d5d3c3c3c3c3c3c3c3c3c3c5b2d3e3e3e3e3e3e3e3e3e2b3e2b3c3c3c3c3c3c3c3c3c3c5d3e3e3e3e3e3e3e3e3e3e5b2d3c3c3c3c3c3c3c3c3c3c2b3e3e3e3e3e3e3e3e3e3e5d3c5b2d3c3c3c2d3e3e3e5d3e3e5b2d5d2b3c3c3c3c3c5b3e3e3e3e3e2d3c3c3c3c3c5b2d5d5d3e3e3e3e3e3e5b2d5d3c3c3c3c5b3e3e3e5b3e2b3c5b2d5d5d3c3c3c5b2d5d5d3e3e3e3e5b3c3c3c3c3c3c3c3c3c3c3c2b3e3e3e3e3e5b2d5d3e5b2d5d3c3c3c5b2d3e3e2b3e2b3c3c3c5d3e3e3e5b2d3c3c3c2b3e3e3e5d3e3e3e3e3e3e5b2d5d3e5b2d5d3c3c3c3c3c3c3c3c5b2d3e3e3e3e3e3e3e3e2b3c3c3c3c3c5b2d5d3e5b2d5d3e3e3e3e5b2d3c3c3c3c3c2b3e2b3e3e3e3e5d3c3c3c3c5b2d3e3e3e3e2b3c3c3c3c5d3c2d2d2d2d2d3e3e5b2d5d2b3c3c5b3e3e2d3c3c5b2d5d5d3e3e5b3e3e3e5b2d5d3c2b3c3c5b2d5d5d3c3c3c3c3c5d3c3c3c3c3c3c3c5b2d5d3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e5b2d3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c2b3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e5d3c3c3c3c3c3c3c3c5b2d5d3e5b2d5d3e3e3e3e3e3e5b2d3c3c3c3c3c3c3c2b3e2b3e3e3e3e3e3e5d3c3c3c3c3c3c5b2d3e3e3e3e3e3e2b3c3c3c3c3c3c5d3e3e3e3e3e3e3e3e5b2d5d3e5b2d5d3c3c3c3c3c3c3c3c3c3c5b2d3e3e3e3e3e3e3e3e3e3e2b3c3c3c3c3c3c3c5b2d5d3e5b2d5d3e3e3e3e3e3e5b2d3c3c3c3c3c3c3c2b3e2b3e3e3e3e3e3e5d3c3c3c3c3c3c5b2d3e3e3e3e3e3e2b3c3c3c3c3c3c5d3c2d2d2d2d2d3e3e5b2d5d2b3c3c5b3e3e2d3c3c5b2d5d5d3e3e5b3e3e3e3e3e5b2d5d3c2b3c3c3c3c5b2d5d5d3c3c3c3c3c5d3c3c3c3c3c3c5b2d5d3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e5b2d3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c2b3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e5d3c3c3c3c5b2d5d5d3c3c3c5b2d5d3e5b2d5d3c3c3c3c3c3c3c3c5b2d3e3e3e3e3e3e3e2b3e2b3c3c3c3c3c3c3c3c5d3e3e3e3e3e3e3e3e5b2d3c3c3c3c3c3c3c3c2b3e3e3e3e3e3e3e3e5d3e5b2d5d2b3c3c5b3e3e2d3c3c5b2d5d5d3e3e5b3c3c3c3c3c3c3c3c2c3e3e3e3e3e3e3e3e5b2d5d5d3c3c3c3c3c3c3c3c5d3c2e3c2e"
