@@ -5,7 +5,7 @@
 
 ## Architecture
 
-The project features a modular architecture where the VM serves as the execution engine for a "Cartridge Registry" system, and conceptually can be used for L2 rollups.
+The project features a modular architecture where the VM serves as the execution engine for a "Cartridge Registry" system, enabling complex logic to be executed on-chain via Brainfuck instructions.
 
 ```
 ┌─────────────────────────────────────────────────────┐
@@ -44,7 +44,7 @@ The project features a modular architecture where the VM serves as the execution
 # Build contracts
 forge build
 
-# Run all tests (including Snake game tests)
+# Run all tests
 forge test -vvv
 
 # Run VM tests only
@@ -59,24 +59,27 @@ npm install
 npm run dev
 ```
 
-## Features & Games
+## Features
 
-### 🐍 Snake Minimalista
-100% On-chain Snake game logic on a 5x5 grid.
-- **On-chain Validation:** Every move is verified by the VM.
-- **Persistence:** Save your high score directly on Monad.
-- **Interactive UI:** Smooth Canvas 2D rendering with retro d-pad controls.
+### 🏗️ Brainfuck Playground (Universal Console)
+The ultimate environment for Monad developers. Write, debug, and execute any Brainfuck code directly on the blockchain. No limits, just pure code execution with real-time feedback.
 
-### 🦠 Game of Life (3D Sphere)
-High-performance cellular automaton stress test.
-- Simulated on-chain via rapid `eth_call` static calls.
-- Visualized in a 3D orbital sphere using Three.js.
+## Available Games
 
-### 🐾 Tamagotchi
-Stateful pet simulation where actions (feed, play, sleep) update a persistent on-chain state.
+### 🐾 Tamagochi
+Stateful pet simulation where actions (feed, play, sleep) update a persistent on-chain state. Every interaction is a transaction on the Monad network.
 
 ### 🎲 Dice Roller
-Stateless RNG math simulation executed purely via Brainfuck commands.
+Stateless RNG math simulation executed purely via Brainfuck commands. It uses a seed from the frontend to calculate a random dice face on-chain.
+
+### ✂️ Rock Scissors Paper
+Classic Jokenpo against the machine. Each move is a real on-chain transaction validated by the Brainfuck VM.
+
+## Monad Integration
+
+- **Optimized for Monad**: Leverages the high throughput and low latency of the Monad blockchain for a smooth gaming experience.
+- **On-chain Persistence**: Game states (like Tamagochi's hunger and happiness) are stored directly in the Monad EVM.
+- **Explorer Feedback**: Integrated transaction logging with direct links to the [Monad Testnet Explorer](https://testnet.monadexplorer.com/) for transparency.
 
 ## Brainfuck Commands
 
