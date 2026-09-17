@@ -2,6 +2,7 @@ import { getProvider, connectWallet, getRegistryContract, getVMContract, setNetw
 import type { NetworkType } from './wallet';
 import { initGoL3D, updateGoL3D, destroyGoL3D } from './GoL3D';
 import { initSnakeCanvas, updateSnakeState, destroySnakeCanvas } from './SnakeRenderer';
+import { setupGlitch, setupGlitchEvents } from './Glitch';
 import { ethers } from 'ethers';
 import './style.css';
 
@@ -15,6 +16,7 @@ const GAMES = {
   contador:   { id: 4, title: "Inverted Counter", type: "stateful" },
   playground: { id: 99, title: "Playground", type: "playground" },
   gameoflife: { id: 6, title: "Game of Life", type: "stresstest" }, // If we ever re-add it
+  glitch:     { id: 7, title: "Glitch Protocol (Lapse)", type: "lapse" },
 };
 
 // ─── State ────────────────────────
@@ -130,6 +132,13 @@ function render() {
           <p>Rule 102 Cellular Automaton. TPS stress test via staticCalls.</p>
           <div class="game-meta"><span>Legacy/Stress</span></div>
         </div>
+
+        <div class="game-card" data-game="glitch">
+          <div class="game-icon">🖲️</div>
+          <h3>Glitch Protocol</h3>
+          <p>A hardcore on-chain roguelike where every swipe manipulates your memory tape natively in Brainfuck.</p>
+          <div class="game-meta"><span>Cost: ~10M Gas</span></div>
+        </div>
       </div>
     `;
     
@@ -159,6 +168,7 @@ function render() {
         if (activeGame === 'jokenpo') setupJokenpo();
         if (activeGame === 'contador') setupContador();
         if (activeGame === 'playground') setupPlayground();
+        if (activeGame === 'glitch') setupGlitch();
       });
     });
   } else {
@@ -394,6 +404,34 @@ function render() {
         </div>
       `;
       setupContadorEvents();
+    }
+
+    if (activeGame === 'glitch') {
+                  gc.innerHTML = `
+        <div class="glitch-display">
+          <div class="terminal-header">
+            <span>SYS.STATUS: <span id="glitch-status" class="blink">AWAITING_CONNECTION</span></span>
+            <span>MEM_FRAGMENTS: 16 BLOCKS</span>
+          </div>
+          
+          <div class="card-container" id="glitch-card-container">
+            <button class="btn swipe-btn btn-left" id="btn-left-swipe" disabled>◀ REJEITAR</button>
+            <div class="glitch-card" id="glitch-card">
+              <div class="card-title">CARREGANDO...</div>
+              <div class="card-desc"></div>
+              <div class="card-swipe-info">Arraste a carta ou use os botões</div>
+            </div>
+            <button class="btn swipe-btn btn-right" id="btn-right-swipe" disabled>ACEITAR ▶</button>
+          </div>
+          
+          <div class="tape-ui" id="glitch-tape">
+              <div style="text-align: center; margin-bottom: 10px; font-size: 0.8rem; letter-spacing: 2px;">VITAL SUPPORT TAPE</div>
+              <div class="tape-row" id="glitch-tape-cells">
+              </div>
+          </div>
+        </div>
+      `;
+setupGlitchEvents();
     }
 
     if (activeGame === 'playground') {

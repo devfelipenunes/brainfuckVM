@@ -1,5 +1,5 @@
 import { ethers } from 'ethers';
-import { MONAD_TESTNET, LOCALHOST_NET, REGISTRY_ABI, VM_ABI, CONTRACTS } from './contracts';
+import { MONAD_TESTNET, LOCALHOST_NET, REGISTRY_ABI, VM_ABI, CONTRACTS, GLITCH_ABI } from './contracts';
 
 export type NetworkType = 'monad' | 'localhost';
 let currentNetworkType: NetworkType = 'monad';
@@ -103,3 +103,13 @@ export function addLog(text: string, type: 'info' | 'success' | 'error' = 'info'
 }
 
 export function getLogs() { return logEntries; }
+
+export function getGlitchContract(): ethers.Contract | null {
+  // Use user-defined var or fallback. Since GlitchManager is new, we fallback to a placeholder initially
+  // In a real flow, the dev runs make deploy and updates .env
+  const address = import.meta.env.VITE_GLITCH_ADDRESS || '0xGlitchSimulator00000000000000000000000';
+  if (!walletState.signer || address === '0x0000000000000000000000000000000000000000' || address.includes('Simulator')) {
+    return null; // Mock if no contract
+  }
+  return new ethers.Contract(address, GLITCH_ABI, walletState.signer);
+}
