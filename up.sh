@@ -34,7 +34,7 @@ fi
 
 # 1. Start Anvil in the background
 echo -e "${YELLOW}Starting Anvil with --monad...${NC}"
-anvil --monad --host 0.0.0.0 > anvil.log 2>&1 &
+anvil --host 0.0.0.0 > anvil.log 2>&1 &
 ANVIL_PID=$!
 
 # Ensure Anvil is killed when the script exits
@@ -58,11 +58,13 @@ echo -e "${YELLOW}Deploying smart contracts to local network...${NC}"
 TEMP_DEPLOY_LOG=$(mktemp)
 # Run forge script and capture output
 PRIVATE_KEY=$PRIVATE_KEY forge script script/Deploy.s.sol --rpc-url $RPC_URL --broadcast -vv | tee "$TEMP_DEPLOY_LOG"
+PRIVATE_KEY=$PRIVATE_KEY forge script script/DeployGlitchManager.s.sol --rpc-url $RPC_URL --broadcast -vv | tee -a "$TEMP_DEPLOY_LOG"
 
 # 4. Extract addresses from the summary section
 # The summary looks like: "BrainfuckVM:       0x..."
 VM_ADDRESS=$(grep "BrainfuckVM:" "$TEMP_DEPLOY_LOG" | tail -n 1 | awk '{print $NF}')
 REGISTRY_ADDRESS=$(grep "CartridgeRegistry:" "$TEMP_DEPLOY_LOG" | tail -n 1 | awk '{print $NF}')
+GLITCH_ADDRESS=$(grep "GlitchManager:" "$TEMP_DEPLOY_LOG" | tail -n 1 | awk '{print $NF}')
 
 rm "$TEMP_DEPLOY_LOG"
 
@@ -75,6 +77,7 @@ fi
 echo -e "${CYAN}----------------------------------------${NC}"
 echo -e "${GREEN}✔ BrainfuckVM:      $VM_ADDRESS${NC}"
 echo -e "${GREEN}✔ CartridgeRegistry: $REGISTRY_ADDRESS${NC}"
+echo -e "${GREEN}✔ GlitchManager:    ${GLITCH_ADDRESS:-Not Deployed}${NC}"
 echo -e "${CYAN}----------------------------------------${NC}"
 
 # 5. Fund specific address for testing
@@ -89,6 +92,17 @@ echo -e "${YELLOW}Injecting addresses into frontend/src/contracts.ts...${NC}"
 # We use a pattern that matches the variable name and updates the value
 sed -i "s/VM_LOCAL: '.*'/VM_LOCAL: '$VM_ADDRESS'/g" frontend/src/contracts.ts
 sed -i "s/REGISTRY_LOCAL: '.*'/REGISTRY_LOCAL: '$REGISTRY_ADDRESS'/g" frontend/src/contracts.ts
+
+# Inject GlitchManager to frontend/.env
+if [ -n "$GLITCH_ADDRESS" ]; then
+    # We append or replace the VITE_GLITCH_ADDRESS
+    if grep -q "VITE_GLITCH_ADDRESS" frontend/.env; then
+        sed -i "s/^VITE_GLITCH_ADDRESS=.*/VITE_GLITCH_ADDRESS=$GLITCH_ADDRESS/g" frontend/.env
+    else
+        echo "VITE_GLITCH_ADDRESS=$GLITCH_ADDRESS" >> frontend/.env
+    fi
+    echo -e "${GREEN}✔ Injected VITE_GLITCH_ADDRESS into .env${NC}"
+fi
 
 # 7. Start Frontend
 echo -e "${YELLOW}Setting up frontend...${NC}"
